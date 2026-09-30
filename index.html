@@ -1,0 +1,804 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tres cartas, una pregunta</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Karla:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg-a:#fbf8f4;
+    --bg-b:#f1e9f9;
+    --panel-bg:#ffffff;
+    --panel-border:#e5d9f2;
+    --panel-border-2:#d9c8ed;
+    --lavender:#b9a3d9;
+    --lavender-deep:#6f5296;
+    --wisteria:#9678bd;
+    --ink-text:#3a3050;
+    --muted:#948aa8;
+    --sage:#93a87e;
+    --blush:#dba9c8;
+    --rose:#a9527a;
+    --card-front-bg:#fffdf9;
+    --card-back-1:#efe3f7;
+    --card-back-2:#e2cdec;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:
+      radial-gradient(ellipse at 12% -8%, #f4e9fb 0%, transparent 50%),
+      radial-gradient(ellipse at 92% 8%, #eef2e3 0%, transparent 45%),
+      radial-gradient(ellipse at 80% 105%, #f3e4f0 0%, transparent 50%),
+      var(--bg-a);
+    color:var(--ink-text);
+    font-family:'Karla',sans-serif;
+    min-height:100vh;
+    line-height:1.55;
+  }
+  .stage{
+    max-width:660px;
+    margin:0 auto;
+    padding:40px 24px 40px;
+  }
+  /* ---------- Hero ---------- */
+  .hero{
+    text-align:center;
+    opacity:0;
+    animation:rise 0.9s ease-out forwards;
+  }
+  @keyframes rise{
+    from{opacity:0; transform:translateY(10px);}
+    to{opacity:1; transform:translateY(0);}
+  }
+  .botanical-hero{
+    width:100%;
+    height:auto;
+    max-height:110px;
+    display:block;
+    margin:0 auto 8px;
+  }
+  .hero h1{
+    font-family:'Cormorant Garamond',serif;
+    font-weight:500;
+    font-size:clamp(2.3rem, 6vw, 3rem);
+    letter-spacing:0.01em;
+    margin:0 0 14px;
+    color:var(--lavender-deep);
+  }
+  .hero .subtitle{
+    color:var(--muted);
+    font-size:1.02rem;
+    max-width:440px;
+    margin:0 auto;
+  }
+  .divider{
+    width:1px;
+    height:36px;
+    background:linear-gradient(var(--wisteria), transparent);
+    margin:28px auto;
+  }
+  /* ---------- Form panel ---------- */
+  .panel{
+    background:var(--panel-bg);
+    border:1px solid var(--panel-border);
+    border-radius:12px;
+    padding:28px 26px 26px;
+    box-shadow:0 18px 40px -28px rgba(111,82,150,0.35);
+  }
+  .panel label{
+    display:block;
+    font-family:'Cormorant Garamond',serif;
+    font-size:1.3rem;
+    margin-bottom:14px;
+    color:var(--lavender-deep);
+  }
+  .chips{
+    display:flex;
+    flex-wrap:wrap;
+    gap:8px;
+    margin-bottom:16px;
+  }
+  .chip{
+    background:transparent;
+    border:1px solid var(--panel-border-2);
+    color:var(--muted);
+    padding:7px 14px;
+    border-radius:20px;
+    font-family:'Karla',sans-serif;
+    font-size:0.85rem;
+    cursor:pointer;
+    transition:border-color 0.2s, color 0.2s, background 0.2s;
+  }
+  .chip:hover{border-color:var(--wisteria); color:var(--lavender-deep);}
+  .chip.active{border-color:var(--wisteria); color:var(--lavender-deep); background:rgba(150,120,189,0.1);}
+  textarea{
+    width:100%;
+    background:#faf7fc;
+    border:1px solid var(--panel-border-2);
+    border-radius:8px;
+    color:var(--ink-text);
+    font-family:'Karla',sans-serif;
+    font-size:0.98rem;
+    padding:14px;
+    resize:vertical;
+    min-height:78px;
+  }
+  textarea:focus, .chip:focus, button:focus{
+    outline:2px solid var(--wisteria);
+    outline-offset:2px;
+  }
+  textarea::placeholder{color:#b3a8c4;}
+  .yesno-row{ margin-top:12px; }
+  .yesno-chip{ font-size:0.82rem; }
+  .yesno-chip.active{
+    border-color:var(--rose);
+    color:var(--rose);
+    background:rgba(169,82,122,0.08);
+  }
+  .panel .hint{
+    min-height:1.2em;
+    font-size:0.85rem;
+    color:var(--rose);
+    margin:8px 0 0;
+  }
+  button.primary{
+    margin-top:16px;
+    width:100%;
+    background:var(--lavender-deep);
+    color:#fffdf9;
+    border:none;
+    border-radius:8px;
+    padding:14px;
+    font-family:'Karla',sans-serif;
+    font-weight:600;
+    font-size:1rem;
+    letter-spacing:0.02em;
+    cursor:pointer;
+    transition:filter 0.15s, transform 0.15s;
+  }
+  button.primary:hover{filter:brightness(1.08);}
+  button.primary:active{transform:scale(0.99);}
+  button.primary:disabled{opacity:0.55; cursor:default;}
+  button.ghost{
+    background:transparent;
+    border:1px solid var(--panel-border-2);
+    color:var(--muted);
+    border-radius:8px;
+    padding:10px 18px;
+    font-family:'Karla',sans-serif;
+    font-size:0.92rem;
+    cursor:pointer;
+  }
+  button.ghost:hover{border-color:var(--wisteria); color:var(--lavender-deep);}
+  /* ---------- Cards ---------- */
+  .hidden{display:none !important;}
+  .cards-section{margin-top:44px;}
+  .cards{
+    display:flex;
+    gap:18px;
+    justify-content:center;
+    flex-wrap:wrap;
+  }
+  .card-slot{
+    width:150px;
+    text-align:center;
+  }
+  .card-viewport{perspective:1400px;}
+  .card{
+    position:relative;
+    width:100%;
+    height:214px;
+    transform-style:preserve-3d;
+    transition:transform 0.85s cubic-bezier(.4,.2,.2,1);
+  }
+  .card.flipped{transform:rotateY(180deg);}
+  .card-face{
+    position:absolute;
+    inset:0;
+    backface-visibility:hidden;
+    border-radius:9px;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    padding:12px;
+  }
+  .card-back{
+    background:linear-gradient(160deg, var(--card-back-1), var(--card-back-2));
+    border:1px solid var(--panel-border-2);
+    box-shadow:inset 0 0 0 4px rgba(150,120,189,0.14);
+  }
+  .card-back .glyph{width:36px; height:36px;}
+  .card-back .glyph *{
+    stroke:var(--lavender-deep); stroke-width:1.4; fill:none;
+  }
+  .card-back .glyph .fill-blush{ fill:var(--blush); stroke:none; }
+  .card-front{
+    background:linear-gradient(160deg, var(--card-front-bg), #f6eefb);
+    border:1px solid var(--panel-border-2);
+    box-shadow:inset 0 0 0 5px rgba(255,255,255,0.5), inset 0 0 0 6px rgba(150,120,189,0.25);
+    transform:rotateY(180deg);
+    color:var(--ink-text);
+  }
+  .card-front .numeral{
+    font-family:'Cormorant Garamond',serif;
+    font-style:italic;
+    font-size:0.82rem;
+    color:var(--wisteria);
+    margin-bottom:4px;
+  }
+  .card-front .glyph{width:38px; height:38px; margin:2px 0 8px;}
+  .card-front .glyph line, .card-front .glyph circle, .card-front .glyph path{
+    stroke:var(--lavender-deep); stroke-width:1.6; fill:none;
+  }
+  .card-front .card-name{
+    font-family:'Cormorant Garamond',serif;
+    font-weight:600;
+    font-size:1.05rem;
+    line-height:1.15;
+  }
+  .card-position{
+    margin-top:12px;
+    font-family:'Cormorant Garamond',serif;
+    font-style:italic;
+    color:var(--wisteria);
+    font-size:0.95rem;
+  }
+  .status-text{
+    text-align:center;
+    color:var(--muted);
+    font-size:0.9rem;
+    margin-top:22px;
+    min-height:1.2em;
+  }
+  /* ---------- Reading ---------- */
+  .reading{
+    margin-top:46px;
+    opacity:0;
+    animation:rise 0.7s ease-out forwards;
+  }
+  .reading .tema{
+    text-align:center;
+    font-family:'Cormorant Garamond',serif;
+    font-style:italic;
+    font-size:1.15rem;
+    color:var(--lavender-deep);
+    max-width:480px;
+    margin:0 auto 34px;
+  }
+  .veredicto{
+    text-align:center;
+    margin:0 auto 30px;
+    padding:16px 22px;
+    border:1px solid var(--panel-border-2);
+    border-radius:14px;
+    background:linear-gradient(160deg,#f9f2fc,#ffffff);
+  }
+  .veredicto .tendencia{
+    font-family:'Cormorant Garamond',serif;
+    font-weight:600;
+    font-size:1.4rem;
+    color:var(--rose);
+  }
+  .veredicto .matiz{
+    margin-top:6px;
+    font-size:0.9rem;
+    color:var(--muted);
+  }
+  .reading h2{
+    font-family:'Cormorant Garamond',serif;
+    font-weight:500;
+    font-size:1.5rem;
+    color:var(--wisteria);
+    margin:0 0 12px;
+    text-align:center;
+  }
+  .card-reading{
+    margin-bottom:22px;
+    padding-bottom:22px;
+    border-bottom:1px solid var(--panel-border);
+  }
+  .card-reading:last-child{border-bottom:none;}
+  .card-reading .ct{
+    font-family:'Cormorant Garamond',serif;
+    font-size:1.15rem;
+    color:var(--lavender-deep);
+    margin-bottom:2px;
+  }
+  .card-reading .cp{
+    font-size:0.82rem;
+    color:var(--muted);
+    margin-bottom:8px;
+  }
+  .card-reading p{margin:0; color:var(--ink-text);}
+  .block{
+    background:var(--panel-bg);
+    border:1px solid var(--panel-border);
+    border-left:2px solid var(--wisteria);
+    border-radius:0 8px 8px 0;
+    padding:20px 22px;
+    margin:30px 0;
+  }
+  .block p{margin:0; color:var(--ink-text);}
+  ul.consejos{
+    list-style:none;
+    margin:30px 0;
+    padding:0;
+  }
+  ul.consejos li{
+    position:relative;
+    padding-left:22px;
+    margin-bottom:12px;
+    color:var(--ink-text);
+  }
+  ul.consejos li::before{
+    content:'';
+    position:absolute;
+    left:0; top:9px;
+    width:8px; height:1px;
+    background:var(--wisteria);
+  }
+  .reflexion{
+    text-align:center;
+    font-family:'Cormorant Garamond',serif;
+    font-style:italic;
+    font-size:1.3rem;
+    color:var(--lavender-deep);
+    max-width:480px;
+    margin:36px auto 8px;
+  }
+  .again{
+    text-align:center;
+    margin-top:30px;
+  }
+  .error-box{
+    text-align:center;
+    color:var(--muted);
+    margin-top:20px;
+  }
+  /* ---------- Footer ---------- */
+  .disclaimer{
+    margin-top:56px;
+    text-align:center;
+    font-size:0.78rem;
+    color:#a89bc0;
+    max-width:420px;
+    margin-left:auto;
+    margin-right:auto;
+    line-height:1.6;
+  }
+  @media (prefers-reduced-motion: reduce){
+    .hero, .reading{animation:none; opacity:1;}
+    .card{transition:none;}
+  }
+</style>
+</head>
+<body>
+<div class="stage">
+
+  <header class="hero">
+    <svg class="botanical-hero" viewBox="0 0 660 100" preserveAspectRatio="xMidYMid meet" aria-hidden="true">
+      <path d="M0,22 C90,44 150,4 250,26 C350,48 410,10 500,28 C560,40 610,16 660,24" stroke="var(--sage)" stroke-width="1.4" fill="none" opacity="0.65"/>
+      <g opacity="0.9">
+        <ellipse cx="95" cy="34" rx="6" ry="8" fill="var(--wisteria)"/>
+        <ellipse cx="91" cy="45" rx="5.5" ry="7.5" fill="var(--lavender)"/>
+        <ellipse cx="97" cy="55" rx="5" ry="7" fill="var(--lavender)"/>
+        <ellipse cx="92" cy="65" rx="4.2" ry="6" fill="var(--blush)"/>
+        <ellipse cx="96" cy="74" rx="3.4" ry="5" fill="var(--blush)"/>
+      </g>
+      <g opacity="0.9">
+        <ellipse cx="565" cy="32" rx="6" ry="8" fill="var(--wisteria)"/>
+        <ellipse cx="569" cy="43" rx="5.5" ry="7.5" fill="var(--lavender)"/>
+        <ellipse cx="563" cy="53" rx="5" ry="7" fill="var(--lavender)"/>
+        <ellipse cx="568" cy="63" rx="4.2" ry="6" fill="var(--blush)"/>
+        <ellipse cx="564" cy="72" rx="3.4" ry="5" fill="var(--blush)"/>
+      </g>
+      <g transform="translate(255,42)">
+        <g fill="#fffdf9" stroke="var(--lavender-deep)" stroke-width="1">
+          <path d="M0,0 C5,-9 5,-20 0,-24 C-5,-20 -5,-9 0,0 Z" transform="rotate(0)"/>
+          <path d="M0,0 C5,-9 5,-20 0,-24 C-5,-20 -5,-9 0,0 Z" transform="rotate(60)"/>
+          <path d="M0,0 C5,-9 5,-20 0,-24 C-5,-20 -5,-9 0,0 Z" transform="rotate(120)"/>
+          <path d="M0,0 C5,-9 5,-20 0,-24 C-5,-20 -5,-9 0,0 Z" transform="rotate(180)"/>
+          <path d="M0,0 C5,-9 5,-20 0,-24 C-5,-20 -5,-9 0,0 Z" transform="rotate(240)"/>
+          <path d="M0,0 C5,-9 5,-20 0,-24 C-5,-20 -5,-9 0,0 Z" transform="rotate(300)"/>
+        </g>
+        <circle cx="0" cy="0" r="3.2" fill="var(--blush)"/>
+      </g>
+      <g transform="translate(415,58) scale(0.8)">
+        <g fill="#fffdf9" stroke="var(--lavender-deep)" stroke-width="1">
+          <path d="M0,0 C5,-9 5,-20 0,-24 C-5,-20 -5,-9 0,0 Z" transform="rotate(0)"/>
+          <path d="M0,0 C5,-9 5,-20 0,-24 C-5,-20 -5,-9 0,0 Z" transform="rotate(60)"/>
+          <path d="M0,0 C5,-9 5,-20 0,-24 C-5,-20 -5,-9 0,0 Z" transform="rotate(120)"/>
+          <path d="M0,0 C5,-9 5,-20 0,-24 C-5,-20 -5,-9 0,0 Z" transform="rotate(180)"/>
+          <path d="M0,0 C5,-9 5,-20 0,-24 C-5,-20 -5,-9 0,0 Z" transform="rotate(240)"/>
+          <path d="M0,0 C5,-9 5,-20 0,-24 C-5,-20 -5,-9 0,0 Z" transform="rotate(300)"/>
+        </g>
+        <circle cx="0" cy="0" r="3.2" fill="var(--blush)"/>
+      </g>
+    </svg>
+    <h1>Tres cartas, una pregunta</h1>
+    <p class="subtitle">Una lectura de tarot Rider&#8209;Waite&#8209;Smith pensada para pensar mejor, no para adivinar. Vos seguís decidiendo.</p>
+  </header>
+
+  <div class="divider"></div>
+
+  <section class="panel" id="form-section">
+    <label for="question">¿Qué querés mirar hoy?</label>
+    <div class="chips" id="chips"></div>
+    <textarea id="question" rows="3" placeholder="Por ejemplo: ¿qué necesito ver hoy en mi trabajo?"></textarea>
+    <div class="yesno-row">
+      <button type="button" class="chip yesno-chip" id="yesno-chip">¿Es una pregunta de sí o no?</button>
+    </div>
+    <p class="hint" id="hint"></p>
+    <button class="primary" id="draw-btn">Tirar las cartas</button>
+  </section>
+
+  <section class="cards-section hidden" id="cards-section">
+    <div class="cards" id="cards-row"></div>
+    <p class="status-text" id="status-text"></p>
+  </section>
+
+  <section class="reading hidden" id="reading-section"></section>
+
+  <footer class="disclaimer">
+    Esta lectura es una herramienta simbólica de orientación, no una certeza ni un reemplazo de asesoría médica, legal o financiera profesional. Las decisiones importantes siguen siendo tuyas.
+  </footer>
+</div>
+
+<script>
+/* =======================================================================
+   CONFIGURACIÓN PARA ALOJAMIENTO EXTERNO
+   -----------------------------------------------------------------------
+   Esta página funciona SIN tocar nada mientras la abrís como artifact
+   dentro de Claude.ai: la llamada a la API se resuelve sola.
+
+   Si la subís a un hosting externo (Netlify, GitHub Pages, Vercel, tu
+   propio servidor, etc.), necesitás tu propia clave de API de Anthropic
+   para que el botón "Tirar las cartas" pueda generar la lectura ahí afuera.
+
+   Pasos:
+   1. Creá una clave en https://console.anthropic.com/settings/keys
+   2. Pegala abajo, entre las comillas de API_KEY.
+   3. Guardá el archivo y volvé a subirlo a tu hosting.
+
+   IMPORTANTE (seguridad): cualquier persona que abra el código fuente de
+   la página (Ctrl+U / "ver código fuente") va a poder ver esta clave.
+   Esto es aceptable para un uso personal o para probar la página, pero
+   NO es seguro para publicarla ampliamente: alguien podría copiar la
+   clave y gastar tu crédito de API. Para una publicación pública real,
+   lo correcto es mover esta llamada a un pequeño servidor propio (o una
+   función serverless) que guarde la clave del lado del servidor y nunca
+   la exponga en el navegador.
+   ======================================================================= */
+const CONFIG = {
+  API_KEY: '',                 // ej: 'sk-ant-api03-...'  (dejalo vacío si estás dentro de Claude.ai)
+  MODEL: 'claude-sonnet-4-6'
+};
+/* =================== FIN DE LA CONFIGURACIÓN =================== */
+
+// ---------- Mazo ----------
+const MAJORS = [
+  {n:'0', name:'El Loco'}, {n:'I', name:'El Mago'}, {n:'II', name:'La Sacerdotisa'},
+  {n:'III', name:'La Emperatriz'}, {n:'IV', name:'El Emperador'}, {n:'V', name:'El Hierofante'},
+  {n:'VI', name:'Los Enamorados'}, {n:'VII', name:'El Carro'}, {n:'VIII', name:'La Fuerza'},
+  {n:'IX', name:'El Ermitaño'}, {n:'X', name:'La Rueda de la Fortuna'}, {n:'XI', name:'La Justicia'},
+  {n:'XII', name:'El Colgado'}, {n:'XIII', name:'La Muerte'}, {n:'XIV', name:'La Templanza'},
+  {n:'XV', name:'El Diablo'}, {n:'XVI', name:'La Torre'}, {n:'XVII', name:'La Estrella'},
+  {n:'XVIII', name:'La Luna'}, {n:'XIX', name:'El Sol'}, {n:'XX', name:'El Juicio'}, {n:'XXI', name:'El Mundo'}
+];
+const SUITS = ['Bastos','Copas','Espadas','Oros'];
+const RANKS = ['As','Dos','Tres','Cuatro','Cinco','Seis','Siete','Ocho','Nueve','Diez','Sota','Caballero','Reina','Rey'];
+
+function buildDeck(){
+  const deck = MAJORS.map(m => ({type:'major', name:m.name, numeral:m.n}));
+  SUITS.forEach(suit => {
+    RANKS.forEach(rank => deck.push({type:'minor', suit, rank, name: rank + ' de ' + suit}));
+  });
+  return deck;
+}
+function shuffle(arr){
+  const a = arr.slice();
+  for(let i=a.length-1;i>0;i--){
+    const j = Math.floor(Math.random()*(i+1));
+    [a[i],a[j]]=[a[j],a[i]];
+  }
+  return a;
+}
+
+// ---------- Iconografía (SVG original, sin reproducir ilustraciones existentes) ----------
+function majorGlyph(){
+  let rays='';
+  for(let a=0;a<360;a+=45){
+    rays += '<line x1="30" y1="13" x2="30" y2="20" transform="rotate('+a+' 30 30)"/>';
+  }
+  return '<svg viewBox="0 0 60 60" class="glyph"><circle cx="30" cy="30" r="9"/>'+rays+'</svg>';
+}
+function lilyBackGlyph(){
+  // flor simple de seis pétalos, usada en el dorso de todas las cartas
+  let petals='';
+  for(let a=0;a<360;a+=60){
+    petals += '<path d="M30,30 C34,21 34,10 30,6 C26,10 26,21 30,30 Z" transform="rotate('+a+' 30 30)"/>';
+  }
+  return '<svg viewBox="0 0 60 60" class="glyph">'+petals+'<circle cx="30" cy="30" r="2.6" class="fill-blush"/></svg>';
+}
+function suitGlyph(suit){
+  const map = {
+    Bastos: '<svg viewBox="0 0 60 60" class="glyph"><line x1="30" y1="8" x2="30" y2="52"/><path d="M30 8 l-6 9 M30 8 l6 9"/><path d="M30 21 l-5 8 M30 21 l5 8"/><path d="M30 34 l-5 8 M30 34 l5 8"/></svg>',
+    Copas: '<svg viewBox="0 0 60 60" class="glyph"><path d="M17 12 h26 l-4.5 17 a9 9 0 0 1 -17 0 z"/><line x1="30" y1="29" x2="30" y2="43"/><line x1="19" y1="47" x2="41" y2="47"/></svg>',
+    Espadas: '<svg viewBox="0 0 60 60" class="glyph"><line x1="30" y1="6" x2="30" y2="44"/><line x1="17" y1="17" x2="43" y2="17"/><path d="M23 44 h14 l-7 9 z"/></svg>',
+    Oros: '<svg viewBox="0 0 60 60" class="glyph"><circle cx="30" cy="30" r="17"/><path d="M30 21 l3.2 8.4 9 .3 -7.2 5.6 2.6 8.7 -7.6 -5.3 -7.6 5.3 2.6 -8.7 -7.2 -5.6 9 -.3 z"/></svg>'
+  };
+  return map[suit];
+}
+function glyphFor(card){ return card.type === 'major' ? majorGlyph() : suitGlyph(card.suit); }
+
+// ---------- Estado ----------
+const POSITIONS = ['Situación actual', 'Desafío o influencia', 'Consejo y tendencia'];
+const THEMES = ['Amor','Trabajo','Dinero','Proyectos','Espiritualidad','Consulta general'];
+let selectedTheme = null;
+let drawnCards = [];
+let isYesNo = false;
+
+const yesnoChip = document.getElementById('yesno-chip');
+const questionTa = document.getElementById('question');
+yesnoChip.addEventListener('click', () => {
+  isYesNo = !isYesNo;
+  yesnoChip.classList.toggle('active', isYesNo);
+  questionTa.placeholder = isYesNo
+    ? 'Por ejemplo: ¿Debería aceptar esta propuesta de trabajo?'
+    : 'Por ejemplo: ¿qué necesito ver hoy en mi trabajo?';
+});
+
+// ---------- Chips ----------
+const chipsEl = document.getElementById('chips');
+THEMES.forEach(t => {
+  const b = document.createElement('button');
+  b.className = 'chip';
+  b.type = 'button';
+  b.textContent = t;
+  b.addEventListener('click', () => {
+    document.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
+    if(selectedTheme === t){ selectedTheme = null; return; }
+    b.classList.add('active');
+    selectedTheme = t;
+    const ta = document.getElementById('question');
+    if(!ta.value.trim()){
+      ta.value = 'Sobre ' + t.toLowerCase() + ': ';
+      ta.focus();
+      ta.setSelectionRange(ta.value.length, ta.value.length);
+    }
+  });
+  chipsEl.appendChild(b);
+});
+
+// ---------- Flujo principal ----------
+const drawBtn = document.getElementById('draw-btn');
+const hint = document.getElementById('hint');
+const cardsSection = document.getElementById('cards-section');
+const cardsRow = document.getElementById('cards-row');
+const statusText = document.getElementById('status-text');
+const readingSection = document.getElementById('reading-section');
+
+drawBtn.addEventListener('click', async () => {
+  const question = document.getElementById('question').value.trim();
+  if(question.length < 6){
+    hint.textContent = 'Contame un poco más para poder leer las cartas con sentido.';
+    return;
+  }
+  hint.textContent = '';
+  drawBtn.disabled = true;
+  readingSection.classList.add('hidden');
+  readingSection.innerHTML = '';
+
+  const deck = buildDeck();
+  drawnCards = shuffle(deck).slice(0,3);
+
+  renderCardBacks();
+  cardsSection.classList.remove('hidden');
+  cardsSection.scrollIntoView({behavior:'smooth', block:'start'});
+
+  await sleep(500);
+  flipCards();
+
+  const messages = ['Barajando el mazo…','Concentrando la energía de tu pregunta…','Leyendo la combinación…'];
+  let mi = 0;
+  statusText.textContent = messages[0];
+  const statusTimer = setInterval(() => {
+    mi = (mi+1) % messages.length;
+    statusText.textContent = messages[mi];
+  }, 1400);
+
+  try{
+    const data = await getReading(question, selectedTheme, drawnCards, isYesNo);
+    clearInterval(statusTimer);
+    statusText.textContent = '';
+    renderReading(data, question, isYesNo);
+  }catch(err){
+    clearInterval(statusTimer);
+    statusText.innerHTML = '';
+    const box = document.createElement('div');
+    box.className = 'error-box';
+    box.innerHTML = 'No pude completar la lectura esta vez. &iquest;Probamos de nuevo?<br><br><button class="ghost" id="retry-btn">Reintentar</button>';
+    cardsSection.appendChild(box);
+    document.getElementById('retry-btn').addEventListener('click', () => {
+      box.remove();
+      drawBtn.disabled = false;
+      drawBtn.click();
+    });
+  }
+  drawBtn.disabled = false;
+});
+
+function sleep(ms){ return new Promise(r => setTimeout(r, ms)); }
+
+function renderCardBacks(){
+  cardsRow.innerHTML = '';
+  drawnCards.forEach((card, i) => {
+    const slot = document.createElement('div');
+    slot.className = 'card-slot';
+    slot.innerHTML =
+      '<div class="card-viewport"><div class="card" id="card-'+i+'">' +
+        '<div class="card-face card-back">' + lilyBackGlyph() + '</div>' +
+        '<div class="card-face card-front">' +
+          (card.type === 'major' ? '<div class="numeral">'+card.numeral+'</div>' : '') +
+          glyphFor(card) +
+          '<div class="card-name">'+card.name+'</div>' +
+        '</div>' +
+      '</div></div>' +
+      '<p class="card-position">'+POSITIONS[i]+'</p>';
+    cardsRow.appendChild(slot);
+  });
+}
+function flipCards(){
+  drawnCards.forEach((_, i) => {
+    setTimeout(() => {
+      document.getElementById('card-'+i).classList.add('flipped');
+    }, i * 260);
+  });
+}
+
+// ---------- Llamada a la API ----------
+async function getReading(question, theme, cards, yesNo){
+  const systemPrompt = 'Sos un/a lector/a de tarot especializado en el mazo Rider-Waite-Smith. Hacés lecturas de tres cartas: cálidas, concretas y sin determinismo. El tarot es una herramienta simbólica de reflexión, nunca una certeza ni un destino fijo.\n\n' +
+'Reglas generales:\n' +
+'- Adaptá el significado tradicional de cada carta al tema de la consulta (amor, trabajo, dinero, proyectos, espiritualidad o consulta general) y a la posición que ocupa (Situación actual, Desafío o influencia, Consejo y tendencia).\n' +
+'- Interpretá las tres cartas de manera integrada: cómo se refuerzan, contrastan o dialogan entre sí según palo, elemento, numerología y presencia de arcanos mayores.\n' +
+'- Nunca afirmes conocer pensamientos de terceros ni anuncies como hechos muertes, enfermedades, embarazos, infidelidades o ganancias económicas. Interpretá las cartas intensas (la Muerte, la Torre, el Diablo, etc.) en clave simbólica, no literal.\n' +
+'- En temas médicos, legales o financieros, aclará que esto no reemplaza asesoría profesional.\n' +
+'- Tono cercano, respetuoso y claro; nada alarmista, nada genérico, nada excesivamente místico.\n' +
+'- Español rioplatense, cercano, podés usar "vos".\n' +
+'- Devolvé ÚNICAMENTE un objeto JSON válido, sin texto adicional, sin backticks ni markdown.\n\n' +
+'Hay DOS modos posibles, indicados en el mensaje de la persona:\n\n' +
+'MODO "sí o no": la persona quiere una respuesta directa a su consulta y un consejo, no un desarrollo largo. Devolvé exactamente este JSON:\n' +
+'{"tema":"resumen breve de la consulta en una frase","veredicto":{"tendencia":"Más cerca del sí" | "Más cerca del no" | "Está dividido, depende de vos","matiz":"una o dos frases que expliquen de dónde sale esa tendencia leyendo el conjunto de las tres cartas, sin presentarla como un hecho cerrado ni determinista"},"consejo":"una recomendación concreta y breve (1 a 3 frases) sobre qué hacer con esa tendencia"}\n' +
+'La tendencia surge de leer el conjunto de las tres cartas (energías favorables u obstaculizantes, arcanos mayores vs. menores, elementos), no de una sola carta. Extensión total combinada entre 60 y 120 palabras: priorizá que sea directo. Meté, sin que suene a aviso legal pegado, que la decisión final es de quien consulta.\n\n' +
+'MODO consulta general (sin sí/no): desarrollo completo. Devolvé exactamente este JSON:\n' +
+'{"tema":"resumen breve de la consulta en una frase","cartas":[{"nombre":"...","posicion":"Situación actual","interpretacion":"..."},{"nombre":"...","posicion":"Desafío o influencia","interpretacion":"..."},{"nombre":"...","posicion":"Consejo y tendencia","interpretacion":"..."}],"lectura_conjunta":"...","consejo_practico":["...","...","..."],"pregunta_reflexion":"..."}\n' +
+'Extensión total combinada entre 380 y 520 palabras. Incluí, sin sonar a aviso legal pegado, que la lectura es orientativa y que las decisiones son de quien consulta.';
+
+  const userMsg = 'Consulta de la persona: "' + question + '"' + (theme ? ' (tema elegido: ' + theme + ')' : '') + '\n\n' +
+'Modo de la consulta: ' + (yesNo ? 'sí o no. Usá el formato JSON del MODO "sí o no".' : 'consulta general. Usá el formato JSON del MODO consulta general.') + '\n\n' +
+'Las tres cartas ya fueron seleccionadas al azar por el sistema. Interpretalas en este orden y con estas posiciones exactas, no elijas otras cartas ni cambies el orden:\n' +
+'1. ' + cards[0].name + ' — posición: Situación actual\n' +
+'2. ' + cards[1].name + ' — posición: Desafío o influencia\n' +
+'3. ' + cards[2].name + ' — posición: Consejo y tendencia\n\n' +
+'Todas las cartas están al derecho (no invertidas).';
+
+  // Cabeceras base. Si se cargó una API_KEY en CONFIG (uso fuera de Claude.ai),
+  // se agregan las cabeceras necesarias para llamar a la API directo desde el navegador.
+  const headers = { "Content-Type": "application/json" };
+  if(CONFIG.API_KEY){
+    headers["x-api-key"] = CONFIG.API_KEY;
+    headers["anthropic-version"] = "2023-06-01";
+    headers["anthropic-dangerous-direct-browser-access"] = "true";
+  }
+
+  const response = await fetch("https://api.anthropic.com/v1/messages", {
+    method: "POST",
+    headers: headers,
+    body: JSON.stringify({
+      model: CONFIG.MODEL,
+      max_tokens: 1000,
+      system: systemPrompt,
+      messages: [{ role: "user", content: userMsg }]
+    })
+  });
+  if(!response.ok){
+    if(!CONFIG.API_KEY){
+      throw new Error('Falta configurar la API_KEY para usar esta página fuera de Claude.ai.');
+    }
+    throw new Error('La API respondió con un error (' + response.status + ').');
+  }
+  const data = await response.json();
+  const textBlock = (data.content || []).find(b => b.type === 'text');
+  if(!textBlock) throw new Error('sin respuesta');
+  const cleaned = textBlock.text.replace(/```json|```/g, '').trim();
+  return JSON.parse(cleaned);
+}
+
+// ---------- Render de la lectura ----------
+function renderReading(data, question, yesNo){
+  readingSection.innerHTML = '';
+  readingSection.classList.remove('hidden');
+
+  const tema = document.createElement('p');
+  tema.className = 'tema';
+  tema.textContent = '"' + (data.tema || question) + '"';
+  readingSection.appendChild(tema);
+
+  if(yesNo && data.veredicto){
+    // Modo sí/no: solo la respuesta y un consejo, sin el desarrollo largo.
+    const ver = document.createElement('div');
+    ver.className = 'veredicto';
+    ver.innerHTML = '<div class="tendencia">'+data.veredicto.tendencia+'</div>' +
+      (data.veredicto.matiz ? '<div class="matiz">'+data.veredicto.matiz+'</div>' : '');
+    readingSection.appendChild(ver);
+
+    const h2c = document.createElement('h2');
+    h2c.textContent = 'Consejo';
+    readingSection.appendChild(h2c);
+    const block = document.createElement('div');
+    block.className = 'block';
+    block.innerHTML = '<p>'+data.consejo+'</p>';
+    readingSection.appendChild(block);
+  } else {
+    const h2a = document.createElement('h2');
+    h2a.textContent = 'Las tres cartas';
+    readingSection.appendChild(h2a);
+
+    (data.cartas || []).forEach(c => {
+      const div = document.createElement('div');
+      div.className = 'card-reading';
+      div.innerHTML = '<div class="ct">'+c.nombre+'</div><div class="cp">'+c.posicion+'</div><p>'+c.interpretacion+'</p>';
+      readingSection.appendChild(div);
+    });
+
+    const h2b = document.createElement('h2');
+    h2b.textContent = 'Lectura conjunta';
+    readingSection.appendChild(h2b);
+    const block = document.createElement('div');
+    block.className = 'block';
+    block.innerHTML = '<p>'+data.lectura_conjunta+'</p>';
+    readingSection.appendChild(block);
+
+    const h2c = document.createElement('h2');
+    h2c.textContent = 'Consejo práctico';
+    readingSection.appendChild(h2c);
+    const ul = document.createElement('ul');
+    ul.className = 'consejos';
+    (data.consejo_practico || []).forEach(item => {
+      const li = document.createElement('li');
+      li.textContent = item;
+      ul.appendChild(li);
+    });
+    readingSection.appendChild(ul);
+
+    const refl = document.createElement('p');
+    refl.className = 'reflexion';
+    refl.textContent = data.pregunta_reflexion;
+    readingSection.appendChild(refl);
+  }
+
+  const again = document.createElement('div');
+  again.className = 'again';
+  again.innerHTML = '<button class="ghost" id="again-btn">Hacer otra consulta</button>';
+  readingSection.appendChild(again);
+  document.getElementById('again-btn').addEventListener('click', () => {
+    document.getElementById('question').value = '';
+    selectedTheme = null;
+    isYesNo = false;
+    document.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
+    questionTa.placeholder = 'Por ejemplo: ¿qué necesito ver hoy en mi trabajo?';
+    readingSection.classList.add('hidden');
+    cardsSection.classList.add('hidden');
+    window.scrollTo({top:0, behavior:'smooth'});
+  });
+
+  readingSection.scrollIntoView({behavior:'smooth', block:'start'});
+}
+</script>
+</body>
+</html>
