@@ -400,9 +400,107 @@
     .card-front .glyph, .card-back .glyph{ width:22px; height:22px; }
     .card-front .card-name{ font-size:0.75rem; }
   }
+  /* ---------- Mariposas decorativas ---------- */
+  .butterflies{
+    position:fixed;
+    inset:0;
+    pointer-events:none;
+    overflow:hidden;
+    z-index:3;
+  }
+  .butterfly-wrap{
+    position:absolute;
+    top:0; left:0;
+    width:30px; height:22px;
+    will-change:transform, opacity;
+  }
+  .butterfly-wrap svg{ width:100%; height:100%; display:block; }
+  .butterfly-wrap .wing{ transform-box:fill-box; }
+  .butterfly-wrap .wing-l{ transform-origin:100% 50%; animation:flutter 0.46s ease-in-out infinite; }
+  .butterfly-wrap .wing-r{ transform-origin:0% 50%; animation:flutter 0.46s ease-in-out infinite; animation-delay:0.02s; }
+  @keyframes flutter{
+    0%,100%{ transform:scaleX(1); }
+    50%{ transform:scaleX(0.38); }
+  }
+  .col-lavender{ color:var(--lavender-deep); }
+  .col-lilac{ color:var(--wisteria); }
+  .col-white{ color:#ffffff; }
+  .b1{ animation:fly1 24s linear infinite; }
+  .b2{ animation:fly2 29s linear infinite 5s; }
+  .b3{ animation:fly3 21s linear infinite 11s; }
+  .b4{ animation:fly4 27s linear infinite 16s; }
+  @keyframes fly1{
+    0%{ transform:translate(-8vw,78vh) rotate(0deg); opacity:0; }
+    8%{ opacity:0.9; }
+    30%{ transform:translate(26vw,48vh) rotate(12deg); }
+    55%{ transform:translate(55vw,62vh) rotate(-10deg); }
+    80%{ transform:translate(82vw,30vh) rotate(8deg); }
+    92%{ opacity:0.9; }
+    100%{ transform:translate(108vw,15vh) rotate(0deg); opacity:0; }
+  }
+  @keyframes fly2{
+    0%{ transform:translate(105vw,20vh) rotate(0deg) scale(0.85); opacity:0; }
+    8%{ opacity:0.85; }
+    32%{ transform:translate(70vw,55vh) rotate(-14deg) scale(0.85); }
+    58%{ transform:translate(40vw,35vh) rotate(10deg) scale(0.85); }
+    82%{ transform:translate(12vw,65vh) rotate(-6deg) scale(0.85); }
+    92%{ opacity:0.85; }
+    100%{ transform:translate(-10vw,80vh) rotate(0deg) scale(0.85); opacity:0; }
+  }
+  @keyframes fly3{
+    0%{ transform:translate(20vw,105vh) rotate(0deg) scale(0.7); opacity:0; }
+    10%{ opacity:0.8; }
+    35%{ transform:translate(45vw,60vh) rotate(15deg) scale(0.7); }
+    60%{ transform:translate(65vw,30vh) rotate(-12deg) scale(0.7); }
+    85%{ transform:translate(85vw,5vh) rotate(10deg) scale(0.7); }
+    93%{ opacity:0.8; }
+    100%{ transform:translate(100vw,-8vh) rotate(0deg) scale(0.7); opacity:0; }
+  }
+  @keyframes fly4{
+    0%{ transform:translate(-8vw,25vh) rotate(0deg) scale(0.9); opacity:0; }
+    9%{ opacity:0.85; }
+    34%{ transform:translate(28vw,8vh) rotate(-10deg) scale(0.9); }
+    60%{ transform:translate(58vw,32vh) rotate(12deg) scale(0.9); }
+    84%{ transform:translate(88vw,55vh) rotate(-8deg) scale(0.9); }
+    93%{ opacity:0.85; }
+    100%{ transform:translate(108vw,70vh) rotate(0deg) scale(0.9); opacity:0; }
+  }
+  @media (prefers-reduced-motion: reduce){
+    .butterflies{ display:none; }
+  }
 </style>
 </head>
 <body>
+<div class="butterflies" aria-hidden="true">
+  <div class="butterfly-wrap b1 col-lavender">
+    <svg viewBox="0 0 40 30">
+      <g class="wing wing-l"><path d="M20,15 C10,0 0,2 2,13 C0,21 10,23 20,15 Z" fill="currentColor" stroke="var(--lavender-deep)" stroke-width="1" fill-opacity="0.85"/></g>
+      <g class="wing wing-r"><path d="M20,15 C30,0 40,2 38,13 C40,21 30,23 20,15 Z" fill="currentColor" stroke="var(--lavender-deep)" stroke-width="1" fill-opacity="0.85"/></g>
+      <line x1="20" y1="7" x2="20" y2="23" stroke="var(--lavender-deep)" stroke-width="1.3"/>
+    </svg>
+  </div>
+  <div class="butterfly-wrap b2 col-lilac">
+    <svg viewBox="0 0 40 30">
+      <g class="wing wing-l"><path d="M20,15 C10,0 0,2 2,13 C0,21 10,23 20,15 Z" fill="currentColor" stroke="var(--lavender-deep)" stroke-width="1" fill-opacity="0.85"/></g>
+      <g class="wing wing-r"><path d="M20,15 C30,0 40,2 38,13 C40,21 30,23 20,15 Z" fill="currentColor" stroke="var(--lavender-deep)" stroke-width="1" fill-opacity="0.85"/></g>
+      <line x1="20" y1="7" x2="20" y2="23" stroke="var(--lavender-deep)" stroke-width="1.3"/>
+    </svg>
+  </div>
+  <div class="butterfly-wrap b3 col-white">
+    <svg viewBox="0 0 40 30">
+      <g class="wing wing-l"><path d="M20,15 C10,0 0,2 2,13 C0,21 10,23 20,15 Z" fill="currentColor" stroke="var(--lavender-deep)" stroke-width="1" fill-opacity="0.95"/></g>
+      <g class="wing wing-r"><path d="M20,15 C30,0 40,2 38,13 C40,21 30,23 20,15 Z" fill="currentColor" stroke="var(--lavender-deep)" stroke-width="1" fill-opacity="0.95"/></g>
+      <line x1="20" y1="7" x2="20" y2="23" stroke="var(--lavender-deep)" stroke-width="1.3"/>
+    </svg>
+  </div>
+  <div class="butterfly-wrap b4 col-lavender">
+    <svg viewBox="0 0 40 30">
+      <g class="wing wing-l"><path d="M20,15 C10,0 0,2 2,13 C0,21 10,23 20,15 Z" fill="currentColor" stroke="var(--lavender-deep)" stroke-width="1" fill-opacity="0.85"/></g>
+      <g class="wing wing-r"><path d="M20,15 C30,0 40,2 38,13 C40,21 30,23 20,15 Z" fill="currentColor" stroke="var(--lavender-deep)" stroke-width="1" fill-opacity="0.85"/></g>
+      <line x1="20" y1="7" x2="20" y2="23" stroke="var(--lavender-deep)" stroke-width="1.3"/>
+    </svg>
+  </div>
+</div>
 <div class="stage">
 
   <header class="hero">
