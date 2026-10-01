@@ -19,8 +19,8 @@
     --ink-text:#3a3050;
     --muted:#948aa8;
     --sage:#93a87e;
-    --blush:#dba9c8;
-    --rose:#a9527a;
+    --blush:#c7a3e0;
+    --rose:#8a4f8f;
     --card-front-bg:#fffdf9;
     --card-back-1:#efe3f7;
     --card-back-2:#e2cdec;
@@ -374,6 +374,32 @@
     .hero, .reading{animation:none; opacity:1;}
     .card{transition:none;}
   }
+  /* ---------- Celulares (iPhone y Android) ---------- */
+  @media (max-width: 480px){
+    .stage{ padding:28px 16px 32px; }
+    .hero h1{ font-size:1.85rem; }
+    .hero .subtitle{ font-size:0.94rem; }
+    .botanical-hero{ max-height:78px; }
+    .panel{ padding:22px 18px 20px; }
+    .chip{ font-size:0.8rem; padding:6px 12px; }
+    .cards{ gap:8px; flex-wrap:nowrap; }
+    .card-slot{ width:auto; flex:1 1 0; min-width:0; }
+    .card{ height:168px; }
+    .card-face{ padding:8px; }
+    .card-front .glyph, .card-back .glyph{ width:26px; height:26px; margin:0 0 6px; }
+    .card-front .numeral{ font-size:0.7rem; }
+    .card-front .card-name{ font-size:0.82rem; }
+    .card-position{ font-size:0.78rem; margin-top:8px; }
+    .reading .tema{ font-size:1.05rem; }
+    .reading h2{ font-size:1.3rem; }
+    .veredicto .tendencia{ font-size:1.2rem; }
+    .reflexion{ font-size:1.15rem; }
+  }
+  @media (max-width: 360px){
+    .card{ height:150px; }
+    .card-front .glyph, .card-back .glyph{ width:22px; height:22px; }
+    .card-front .card-name{ font-size:0.75rem; }
+  }
 </style>
 </head>
 <body>
@@ -450,34 +476,16 @@
 
 <script>
 /* =======================================================================
-   CONFIGURACIÓN PARA ALOJAMIENTO EXTERNO
+   MOTOR DE LECTURA LOCAL (sin API, sin clave, sin conexión a internet)
    -----------------------------------------------------------------------
-   Esta página funciona SIN tocar nada mientras la abrís como artifact
-   dentro de Claude.ai: la llamada a la API se resuelve sola.
-
-   Si la subís a un hosting externo (Netlify, GitHub Pages, Vercel, tu
-   propio servidor, etc.), necesitás tu propia clave de API de Anthropic
-   para que el botón "Tirar las cartas" pueda generar la lectura ahí afuera.
-
-   Pasos:
-   1. Creá una clave en https://console.anthropic.com/settings/keys
-   2. Pegala abajo, entre las comillas de API_KEY.
-   3. Guardá el archivo y volvé a subirlo a tu hosting.
-
-   IMPORTANTE (seguridad): cualquier persona que abra el código fuente de
-   la página (Ctrl+U / "ver código fuente") va a poder ver esta clave.
-   Esto es aceptable para un uso personal o para probar la página, pero
-   NO es seguro para publicarla ampliamente: alguien podría copiar la
-   clave y gastar tu crédito de API. Para una publicación pública real,
-   lo correcto es mover esta llamada a un pequeño servidor propio (o una
-   función serverless) que guarde la clave del lado del servidor y nunca
-   la exponga en el navegador.
+   Esta versión arma la lectura combinando, con reglas fijas, el
+   significado de cada una de las 78 cartas (adaptado al tema elegido y
+   a la posición que ocupa) más el análisis del conjunto (arcanos
+   mayores vs. menores, palo dominante). No es tan a medida palabra por
+   palabra como una lectura generada por IA, pero funciona 100% sola:
+   se puede publicar en GitHub Pages o cualquier hosting estático tal
+   cual, sin configurar nada.
    ======================================================================= */
-const CONFIG = {
-  API_KEY: '',                 // ej: 'sk-ant-api03-...'  (dejalo vacío si estás dentro de Claude.ai)
-  MODEL: 'claude-sonnet-4-6'
-};
-/* =================== FIN DE LA CONFIGURACIÓN =================== */
 
 // ---------- Mazo ----------
 const MAJORS = [
@@ -507,6 +515,95 @@ function shuffle(arr){
   }
   return a;
 }
+
+// ---------- Diccionario de significados (offline) ----------
+// esencia: usada en "Situación actual" y "Desafío o influencia"
+// consejo: usada en "Consejo y tendencia" y como ítem de la lista de consejos prácticos
+// pol: 'pos' | 'neg' | 'neu' -> polaridad orientativa para el modo sí/no
+const CARD_DATA = {
+  'El Loco': {esencia:'comienzos espontáneos, un salto de fe hacia lo desconocido', consejo:'animate a dar el primer paso, aunque no tengas todo resuelto', pol:'neu'},
+  'El Mago': {esencia:'voluntad y recursos disponibles para concretar una idea', consejo:'usá las herramientas que ya tenés, no esperes más para empezar', pol:'pos'},
+  'La Sacerdotisa': {esencia:'intuición y un saber que todavía no se dice en voz alta', consejo:'hacé una pausa antes de actuar y escuchá lo que tu intuición te dice', pol:'neu'},
+  'La Emperatriz': {esencia:'abundancia y cuidado, algo que está en pleno crecimiento', consejo:'date permiso de disfrutar y de cuidar lo que estás construyendo', pol:'pos'},
+  'El Emperador': {esencia:'estructura y límites claros que sostienen la situación', consejo:'poné reglas claras y sostenelas con constancia', pol:'pos'},
+  'El Hierofante': {esencia:'aprendizaje guiado, apoyarte en marcos que ya conocés', consejo:'buscá el consejo de alguien con más experiencia, o lo que ya sabés que funciona', pol:'pos'},
+  'Los Enamorados': {esencia:'una elección desde los valores propios, afinidad genuina', consejo:'elegí desde lo que realmente valorás, no desde la presión externa', pol:'pos'},
+  'El Carro': {esencia:'avance con determinación entre fuerzas que tiran para distintos lados', consejo:'mantené el rumbo aunque tengas que equilibrar intereses distintos', pol:'pos'},
+  'La Fuerza': {esencia:'una fuerza interior serena para manejar algo intenso', consejo:'respondé con calma y firmeza, no con imposición', pol:'pos'},
+  'El Ermitaño': {esencia:'introspección, necesidad de distancia para buscar respuestas propias', consejo:'tomate un tiempo a solas antes de decidir', pol:'neu'},
+  'La Rueda de la Fortuna': {esencia:'un ciclo que cambia, algo se mueve más allá de tu control', consejo:'acompañá el cambio en vez de resistirlo', pol:'pos'},
+  'La Justicia': {esencia:'equilibrio y consecuencias claras frente a una decisión', consejo:'sé honesto con vos mismo/a y sopesá bien antes de decidir', pol:'neu'},
+  'El Colgado': {esencia:'una pausa forzada que invita a mirar la situación desde otro ángulo', consejo:'esperá antes de actuar y probá ver esto desde otra perspectiva', pol:'neg'},
+  'La Muerte': {esencia:'el cierre de una etapa que da lugar a otra distinta', consejo:'soltá lo que ya cumplió su ciclo para que pueda entrar algo nuevo', pol:'neg'},
+  'La Templanza': {esencia:'equilibrio gradual, mezclar en vez de irte a un extremo', consejo:'buscá el término medio y avanzá de a poco', pol:'pos'},
+  'El Diablo': {esencia:'una atadura o un patrón repetido que limita más de lo que parece', consejo:'identificá qué te está atando y animate a cuestionarlo', pol:'neg'},
+  'La Torre': {esencia:'una revelación brusca, algo que se cae para dar paso a lo real', consejo:'no te aferres a lo que ya no sostiene, aunque el cambio incomode', pol:'neg'},
+  'La Estrella': {esencia:'esperanza renovada, confianza después de un momento difícil', consejo:'confiá en que lo peor ya pasó y dejate guiar por lo que te inspira', pol:'pos'},
+  'La Luna': {esencia:'una zona confusa, emociones o información que todavía no terminan de definirse', consejo:'no tomes decisiones grandes hasta que el panorama esté más claro', pol:'neg'},
+  'El Sol': {esencia:'claridad y vitalidad, algo que se muestra tal cual es', consejo:'mostrate tal cual sos, este es un buen momento para eso', pol:'pos'},
+  'El Juicio': {esencia:'un llamado a revisar y tomar conciencia de algo importante', consejo:'hacé un balance honesto y animate a dar el paso que ese balance pide', pol:'pos'},
+  'El Mundo': {esencia:'un ciclo que se completa, logro e integración', consejo:'reconocé lo que lograste antes de lanzarte a lo próximo', pol:'pos'},
+
+  'As de Bastos': {esencia:'una chispa nueva, ganas de empezar algo con energía', consejo:'aprovechá el impulso inicial y dale forma concreta', pol:'pos'},
+  'Dos de Bastos': {esencia:'mirar más allá del horizonte y planificar el próximo paso', consejo:'animate a pensar en grande y trazar un plan', pol:'pos'},
+  'Tres de Bastos': {esencia:'lo que sembraste empieza a expandirse, mirada puesta en lo que viene', consejo:'mantené la vista en el mediano plazo y seguí expandiendo', pol:'pos'},
+  'Cuatro de Bastos': {esencia:'un festejo merecido, estabilidad después de un esfuerzo', consejo:'date el gusto de celebrar un logro antes de seguir', pol:'pos'},
+  'Cinco de Bastos': {esencia:'tensión o competencia, distintas voluntades chocando entre sí', consejo:'buscá el punto en común en vez de entrar en la pelea', pol:'neg'},
+  'Seis de Bastos': {esencia:'reconocimiento, un esfuerzo que empieza a dar frutos visibles', consejo:'animate a mostrar lo que lograste, te lo ganaste', pol:'pos'},
+  'Siete de Bastos': {esencia:'sostener una posición, defender lo propio frente a la presión', consejo:'mantené tu postura, tenés más terreno ganado del que pensás', pol:'neu'},
+  'Ocho de Bastos': {esencia:'movimiento rápido, novedades que llegan sin demora', consejo:'actuá pronto, las cosas se están moviendo rápido', pol:'pos'},
+  'Nueve de Bastos': {esencia:'cansancio pero con la guardia en alto, casi al final del camino', consejo:'no bajes los brazos, estás más cerca de la meta de lo que sentís', pol:'neu'},
+  'Diez de Bastos': {esencia:'una carga pesada, demasiadas responsabilidades encima', consejo:'delegá o soltá algo de lo que estás cargando en soledad', pol:'neg'},
+  'Sota de Bastos': {esencia:'curiosidad y entusiasmo, ganas de explorar algo nuevo', consejo:'explorá esa idea nueva con la mente abierta', pol:'neu'},
+  'Caballero de Bastos': {esencia:'impulso y acción rápida, a veces sin medir del todo el riesgo', consejo:'actuá con decisión, pero no te olvides de mirar antes de saltar', pol:'pos'},
+  'Reina de Bastos': {esencia:'seguridad en una misma, calidez y determinación a la vez', consejo:'confiá en tu propia seguridad para sostener lo que querés', pol:'pos'},
+  'Rey de Bastos': {esencia:'liderazgo con visión, capacidad de inspirar y sostener proyectos', consejo:'asumí el liderazgo de la situación con visión de conjunto', pol:'pos'},
+
+  'As de Copas': {esencia:'un sentimiento nuevo que se abre, una emoción que empieza a fluir', consejo:'dejá que ese sentimiento nuevo se exprese sin apurarlo', pol:'pos'},
+  'Dos de Copas': {esencia:'una conexión mutua, un encuentro genuino entre dos partes', consejo:'cuidá esa conexión desde la reciprocidad', pol:'pos'},
+  'Tres de Copas': {esencia:'celebración compartida, el valor del vínculo con otros', consejo:'compartí este momento con quienes te acompañan', pol:'pos'},
+  'Cuatro de Copas': {esencia:'cierto hastío o desconexión frente a algo bueno que no se está viendo', consejo:'prestá atención a lo que ya tenés antes de buscar en otro lado', pol:'neg'},
+  'Cinco de Copas': {esencia:'una pérdida que pesa, la mirada puesta en lo que se derramó', consejo:'date permiso de sentir la pérdida, pero girá la mirada hacia lo que sigue en pie', pol:'neg'},
+  'Seis de Copas': {esencia:'nostalgia, algo del pasado que vuelve o que enseña', consejo:'tomá lo bueno del pasado sin quedarte a vivir ahí', pol:'neu'},
+  'Siete de Copas': {esencia:'muchas opciones y algo de fantasía, hace falta elegir con los pies en la tierra', consejo:'elegí una opción concreta en vez de quedarte soñando con todas', pol:'neu'},
+  'Ocho de Copas': {esencia:'alejarse de algo que ya no llena, aunque cueste', consejo:'animate a dejar atrás lo que ya no te completa, aunque implique incertidumbre', pol:'neg'},
+  'Nueve de Copas': {esencia:'satisfacción, un deseo que se está cumpliendo', consejo:'disfrutá este momento de bienestar, te lo merecés', pol:'pos'},
+  'Diez de Copas': {esencia:'armonía plena, un vínculo o una vida que se siente completa', consejo:'cuidá y sostené esa armonía que ya construiste', pol:'pos'},
+  'Sota de Copas': {esencia:'una propuesta emocional tierna, sensibilidad que se anima a expresarse', consejo:'animate a expresar lo que sentís, aunque sea con timidez', pol:'neu'},
+  'Caballero de Copas': {esencia:'un acercamiento romántico o idealista, seguir al corazón', consejo:'seguí a tu corazón, pero sin perder de vista lo real', pol:'pos'},
+  'Reina de Copas': {esencia:'empatía profunda, contención emocional hacia una misma y hacia otros', consejo:'confiá en tu sensibilidad como guía, sin descuidarte a vos', pol:'pos'},
+  'Rey de Copas': {esencia:'equilibrio emocional, manejar los sentimientos con madurez', consejo:'respondé desde la calma emocional, no desde el impulso', pol:'pos'},
+
+  'As de Espadas': {esencia:'una idea clara, un momento de lucidez o de verdad que se impone', consejo:'actuá con esa claridad recién ganada, decilo o hacelo con precisión', pol:'pos'},
+  'Dos de Espadas': {esencia:'una decisión postergada, un impasse entre dos posturas', consejo:'no sigas evitando la decisión, aunque sea incómoda', pol:'neg'},
+  'Tres de Espadas': {esencia:'un dolor o una desilusión que hay que atravesar', consejo:'date tiempo para procesar el dolor antes de seguir', pol:'neg'},
+  'Cuatro de Espadas': {esencia:'una pausa necesaria para descansar la mente antes de retomar', consejo:'date un respiro real antes de volver a la acción', pol:'neu'},
+  'Cinco de Espadas': {esencia:'un conflicto donde nadie gana del todo, algo que sale caro', consejo:'evaluá si vale la pena seguir peleando esta batalla en particular', pol:'neg'},
+  'Seis de Espadas': {esencia:'un traslado hacia algo más tranquilo, dejar atrás la turbulencia', consejo:'avanzá hacia lo que te dé más calma, aunque sea de a poco', pol:'pos'},
+  'Siete de Espadas': {esencia:'una estrategia poco transparente, algo que se maneja a solas o a escondidas', consejo:'revisá si estás siendo del todo honesto/a en esta situación', pol:'neg'},
+  'Ocho de Espadas': {esencia:'sentirse atrapado/a, aunque la salida esté más cerca de lo que parece', consejo:'cuestioná esa sensación de no tener salida, probablemente tenés más margen del que creés', pol:'neg'},
+  'Nueve de Espadas': {esencia:'preocupación que crece de noche, pensamientos que dan vueltas', consejo:'no te quedes solo/a con esa preocupación, hablalo con alguien', pol:'neg'},
+  'Diez de Espadas': {esencia:'un final doloroso pero definitivo, tocar fondo para poder empezar de nuevo', consejo:'aceptá que este ciclo terminó, así podés empezar el siguiente', pol:'neg'},
+  'Sota de Espadas': {esencia:'curiosidad mental, ganas de investigar o decir algo con franqueza', consejo:'hacé la pregunta directa que estás evitando', pol:'neu'},
+  'Caballero de Espadas': {esencia:'avance rápido y directo, a veces sin demasiado filtro', consejo:'actuá con decisión, pero cuidá las formas al decirlo', pol:'neu'},
+  'Reina de Espadas': {esencia:'claridad mental, decir las cosas como son sin rodeos', consejo:'sé honesto/a y directo/a, sin necesidad de ser duro/a', pol:'neu'},
+  'Rey de Espadas': {esencia:'juicio objetivo, decisiones basadas en la razón más que en la emoción', consejo:'analizá la situación con la cabeza fría antes de decidir', pol:'neu'},
+
+  'As de Oros': {esencia:'una oportunidad concreta, una semilla material que se puede cultivar', consejo:'aprovechá esta oportunidad concreta que se presenta', pol:'pos'},
+  'Dos de Oros': {esencia:'hacer malabares entre dos prioridades, adaptarse a los cambios', consejo:'organizá tus prioridades, aunque tengas que ajustar sobre la marcha', pol:'neu'},
+  'Tres de Oros': {esencia:'trabajo en equipo, una habilidad que empieza a ser reconocida', consejo:'sumá a otros a lo que estás construyendo, no lo hagas en soledad', pol:'pos'},
+  'Cuatro de Oros': {esencia:'necesidad de seguridad, quizás demasiado apego a lo que ya se tiene', consejo:'revisá si estás reteniendo por seguridad o por miedo a soltar', pol:'neu'},
+  'Cinco de Oros': {esencia:'una carencia real o percibida, sentirse afuera de algo', consejo:'buscá ayuda o recursos que quizás no estás viendo todavía', pol:'neg'},
+  'Seis de Oros': {esencia:'un intercambio, dar y recibir en cierto equilibrio', consejo:'fijate si la balanza entre dar y recibir está pareja', pol:'neu'},
+  'Siete de Oros': {esencia:'una pausa para evaluar el esfuerzo invertido antes de seguir', consejo:'tomate un momento para evaluar si vale la pena seguir invirtiendo ahí', pol:'neu'},
+  'Ocho de Oros': {esencia:'dedicación y trabajo constante, perfeccionar un oficio', consejo:'seguí puliendo lo que estás haciendo, el esfuerzo constante va a dar resultado', pol:'pos'},
+  'Nueve de Oros': {esencia:'independencia lograda con esfuerzo propio, disfrutar de lo construido', consejo:'disfrutá de lo que lograste con tu propio esfuerzo', pol:'pos'},
+  'Diez de Oros': {esencia:'estabilidad a largo plazo, algo que trasciende lo individual', consejo:'pensá en el largo plazo y en lo que dejás para después', pol:'pos'},
+  'Sota de Oros': {esencia:'un proyecto concreto que recién arranca, ganas de aprender algo práctico', consejo:'dale un primer paso concreto y práctico a esa idea', pol:'neu'},
+  'Caballero de Oros': {esencia:'avance lento pero seguro, constancia por sobre la velocidad', consejo:'priorizá la constancia por sobre la urgencia', pol:'pos'},
+  'Reina de Oros': {esencia:'cuidado práctico, generosidad con los pies en la tierra', consejo:'cuidá lo material y a los tuyos con los pies en la tierra', pol:'pos'},
+  'Rey de Oros': {esencia:'solidez y abundancia construida con el tiempo', consejo:'tomá decisiones desde la solidez que ya construiste', pol:'pos'}
+};
 
 // ---------- Iconografía (SVG original, sin reproducir ilustraciones existentes) ----------
 function majorGlyph(){
@@ -609,10 +706,10 @@ drawBtn.addEventListener('click', async () => {
   const statusTimer = setInterval(() => {
     mi = (mi+1) % messages.length;
     statusText.textContent = messages[mi];
-  }, 1400);
+  }, 750);
 
   try{
-    const data = await getReading(question, selectedTheme, drawnCards, isYesNo);
+    const data = await withMinDelay(generateReading(question, selectedTheme, drawnCards, isYesNo), 1900);
     clearInterval(statusTimer);
     statusText.textContent = '';
     renderReading(data, question, isYesNo);
@@ -621,7 +718,7 @@ drawBtn.addEventListener('click', async () => {
     statusText.innerHTML = '';
     const box = document.createElement('div');
     box.className = 'error-box';
-    box.innerHTML = 'No pude completar la lectura esta vez. &iquest;Probamos de nuevo?<br><br><button class="ghost" id="retry-btn">Reintentar</button>';
+    box.innerHTML = 'No pude armar la lectura esta vez. &iquest;Probamos de nuevo?<br><br><button class="ghost" id="retry-btn">Reintentar</button>';
     cardsSection.appendChild(box);
     document.getElementById('retry-btn').addEventListener('click', () => {
       box.remove();
@@ -633,6 +730,9 @@ drawBtn.addEventListener('click', async () => {
 });
 
 function sleep(ms){ return new Promise(r => setTimeout(r, ms)); }
+function withMinDelay(promiseOrValue, ms){
+  return Promise.all([Promise.resolve(promiseOrValue), sleep(ms)]).then(r => r[0]);
+}
 
 function renderCardBacks(){
   cardsRow.innerHTML = '';
@@ -660,63 +760,126 @@ function flipCards(){
   });
 }
 
-// ---------- Llamada a la API ----------
-async function getReading(question, theme, cards, yesNo){
-  const systemPrompt = 'Sos un/a lector/a de tarot especializado en el mazo Rider-Waite-Smith. Hacés lecturas de tres cartas: cálidas, concretas y sin determinismo. El tarot es una herramienta simbólica de reflexión, nunca una certeza ni un destino fijo.\n\n' +
-'Reglas generales:\n' +
-'- Adaptá el significado tradicional de cada carta al tema de la consulta (amor, trabajo, dinero, proyectos, espiritualidad o consulta general) y a la posición que ocupa (Situación actual, Desafío o influencia, Consejo y tendencia).\n' +
-'- Interpretá las tres cartas de manera integrada: cómo se refuerzan, contrastan o dialogan entre sí según palo, elemento, numerología y presencia de arcanos mayores.\n' +
-'- Nunca afirmes conocer pensamientos de terceros ni anuncies como hechos muertes, enfermedades, embarazos, infidelidades o ganancias económicas. Interpretá las cartas intensas (la Muerte, la Torre, el Diablo, etc.) en clave simbólica, no literal.\n' +
-'- En temas médicos, legales o financieros, aclará que esto no reemplaza asesoría profesional.\n' +
-'- Tono cercano, respetuoso y claro; nada alarmista, nada genérico, nada excesivamente místico.\n' +
-'- Español rioplatense, cercano, podés usar "vos".\n' +
-'- Devolvé ÚNICAMENTE un objeto JSON válido, sin texto adicional, sin backticks ni markdown.\n\n' +
-'Hay DOS modos posibles, indicados en el mensaje de la persona:\n\n' +
-'MODO "sí o no": la persona quiere una respuesta directa a su consulta y un consejo, no un desarrollo largo. Devolvé exactamente este JSON:\n' +
-'{"tema":"resumen breve de la consulta en una frase","veredicto":{"tendencia":"Más cerca del sí" | "Más cerca del no" | "Está dividido, depende de vos","matiz":"una o dos frases que expliquen de dónde sale esa tendencia leyendo el conjunto de las tres cartas, sin presentarla como un hecho cerrado ni determinista"},"consejo":"una recomendación concreta y breve (1 a 3 frases) sobre qué hacer con esa tendencia"}\n' +
-'La tendencia surge de leer el conjunto de las tres cartas (energías favorables u obstaculizantes, arcanos mayores vs. menores, elementos), no de una sola carta. Extensión total combinada entre 60 y 120 palabras: priorizá que sea directo. Meté, sin que suene a aviso legal pegado, que la decisión final es de quien consulta.\n\n' +
-'MODO consulta general (sin sí/no): desarrollo completo. Devolvé exactamente este JSON:\n' +
-'{"tema":"resumen breve de la consulta en una frase","cartas":[{"nombre":"...","posicion":"Situación actual","interpretacion":"..."},{"nombre":"...","posicion":"Desafío o influencia","interpretacion":"..."},{"nombre":"...","posicion":"Consejo y tendencia","interpretacion":"..."}],"lectura_conjunta":"...","consejo_practico":["...","...","..."],"pregunta_reflexion":"..."}\n' +
-'Extensión total combinada entre 380 y 520 palabras. Incluí, sin sonar a aviso legal pegado, que la lectura es orientativa y que las decisiones son de quien consulta.';
+// ---------- Motor de lectura local ----------
+const THEME_KEYS = {
+  'Amor':'amor', 'Trabajo':'trabajo', 'Dinero':'dinero',
+  'Proyectos':'proyectos', 'Espiritualidad':'espiritualidad', 'Consulta general':'general'
+};
 
-  const userMsg = 'Consulta de la persona: "' + question + '"' + (theme ? ' (tema elegido: ' + theme + ')' : '') + '\n\n' +
-'Modo de la consulta: ' + (yesNo ? 'sí o no. Usá el formato JSON del MODO "sí o no".' : 'consulta general. Usá el formato JSON del MODO consulta general.') + '\n\n' +
-'Las tres cartas ya fueron seleccionadas al azar por el sistema. Interpretalas en este orden y con estas posiciones exactas, no elijas otras cartas ni cambies el orden:\n' +
-'1. ' + cards[0].name + ' — posición: Situación actual\n' +
-'2. ' + cards[1].name + ' — posición: Desafío o influencia\n' +
-'3. ' + cards[2].name + ' — posición: Consejo y tendencia\n\n' +
-'Todas las cartas están al derecho (no invertidas).';
+const POSITION_TEXT = {
+  0: { // Situación actual — usa la "esencia" de la carta
+    amor: e => 'En el amor, tu momento actual tiene que ver con ' + e + '.',
+    trabajo: e => 'En lo laboral, tu situación de fondo hoy es ' + e + '.',
+    dinero: e => 'En tus finanzas, la energía de fondo es ' + e + '.',
+    proyectos: e => 'En tu proyecto, el momento que atravesás se define por ' + e + '.',
+    espiritualidad: e => 'En tu proceso interior, hoy resuena ' + e + '.',
+    general: e => 'En esta consulta, tu momento actual está atravesado por ' + e + '.'
+  },
+  1: { // Desafío o influencia — usa la "esencia" de la carta
+    amor: e => 'El desafío en el vínculo tiene que ver con ' + e + '.',
+    trabajo: e => 'El desafío a reconocer en lo laboral es ' + e + '.',
+    dinero: e => 'Lo que conviene mirar de frente en el terreno económico es ' + e + '.',
+    proyectos: e => 'El aspecto a trabajar en el proyecto es ' + e + '.',
+    espiritualidad: e => 'Lo que este momento te invita a reconocer en vos es ' + e + '.',
+    general: e => 'El desafío o la influencia a tener en cuenta es ' + e + '.'
+  },
+  2: { // Consejo y tendencia — usa el "consejo" de la carta
+    amor: c => 'El consejo para el vínculo es: ' + c + '.',
+    trabajo: c => 'El consejo a nivel laboral es: ' + c + '.',
+    dinero: c => 'El consejo en lo económico es: ' + c + '.',
+    proyectos: c => 'El consejo para el proyecto es: ' + c + '.',
+    espiritualidad: c => 'El consejo para tu proceso interior es: ' + c + '.',
+    general: c => 'El consejo que trae esta carta es: ' + c + '.'
+  }
+};
 
-  // Cabeceras base. Si se cargó una API_KEY en CONFIG (uso fuera de Claude.ai),
-  // se agregan las cabeceras necesarias para llamar a la API directo desde el navegador.
-  const headers = { "Content-Type": "application/json" };
-  if(CONFIG.API_KEY){
-    headers["x-api-key"] = CONFIG.API_KEY;
-    headers["anthropic-version"] = "2023-06-01";
-    headers["anthropic-dangerous-direct-browser-access"] = "true";
+const REFLEXIONES = [
+  '¿Qué parte de esto ya sabías, aunque todavía no te animaste a decirlo en voz alta?',
+  'Si nadie más opinara sobre esto, ¿qué harías?',
+  '¿Qué necesitás soltar para poder avanzar con más claridad?',
+  '¿Qué te está pidiendo este momento que todavía no le diste?',
+  '¿Qué cambiaría si confiaras un poco más en lo que ya sabés?',
+  '¿Qué parte de la respuesta depende solo de vos?',
+  '¿Qué estás esperando que pase para animarte a decidir?',
+  '¿Qué versión de vos querés que tome esta decisión?'
+];
+
+function pick(arr){ return arr[Math.floor(Math.random()*arr.length)]; }
+function cap(s){ return s.charAt(0).toUpperCase() + s.slice(1); }
+
+function buildLecturaConjunta(cards){
+  const majors = cards.filter(c => c.type === 'major').length;
+  const suitCounts = {};
+  cards.filter(c => c.type === 'minor').forEach(c => { suitCounts[c.suit] = (suitCounts[c.suit]||0)+1; });
+  let dominantSuit = null, maxCount = 0;
+  for(const s in suitCounts){ if(suitCounts[s] > maxCount){ maxCount = suitCounts[s]; dominantSuit = s; } }
+
+  let intro;
+  if(majors === 3) intro = 'Las tres cartas que salieron son arcanos mayores: eso suele señalar un momento de peso, donde lo que está en juego va más allá de un detalle puntual.';
+  else if(majors === 2) intro = 'Dos de las tres cartas son arcanos mayores, lo que sugiere que hay una fuerza importante moviéndose de fondo en esta consulta, más allá de lo cotidiano.';
+  else if(majors === 1) intro = 'Aparece un arcano mayor entre cartas más cotidianas: hay un tema de fondo importante que se mezcla con la dinámica del día a día.';
+  else intro = 'Las tres cartas son arcanos menores: esta consulta tiene más que ver con la dinámica cotidiana y concreta que con un giro grande de destino.';
+
+  let elemento = '';
+  if(dominantSuit && maxCount >= 2){
+    const elementText = {
+      Bastos: 'predomina el elemento fuego (Bastos): la energía, la iniciativa y la acción están pidiendo protagonismo',
+      Copas: 'predomina el elemento agua (Copas): lo emocional y los vínculos son el terreno donde se juega esta consulta',
+      Espadas: 'predomina el elemento aire (Espadas): el pensamiento, la comunicación o un conflicto a resolver están en el centro',
+      Oros: 'predomina el elemento tierra (Oros): lo concreto, lo material y lo práctico son el foco de esta consulta'
+    };
+    elemento = ' Además, ' + elementText[dominantSuit] + '.';
   }
 
-  const response = await fetch("https://api.anthropic.com/v1/messages", {
-    method: "POST",
-    headers: headers,
-    body: JSON.stringify({
-      model: CONFIG.MODEL,
-      max_tokens: 1000,
-      system: systemPrompt,
-      messages: [{ role: "user", content: userMsg }]
-    })
+  const cierre = ' En conjunto, ' + cards[0].name + ', ' + cards[1].name + ' y ' + cards[2].name +
+    ' arman una secuencia que va del punto en el que estás parado/a, pasando por lo que conviene mirar de frente, hacia una dirección posible a seguir. La lectura es orientativa: lo que hagas con esto es una decisión que sigue siendo tuya.';
+
+  return intro + elemento + cierre;
+}
+
+function buildVeredicto(cards){
+  const score = cards.reduce((acc, c) => {
+    const p = CARD_DATA[c.name].pol;
+    return acc + (p === 'pos' ? 1 : p === 'neg' ? -1 : 0);
+  }, 0);
+
+  let tendencia, matiz;
+  if(score >= 2){
+    tendencia = 'Más cerca del sí';
+    matiz = 'Las tres cartas traen más elementos favorables que obstáculos, así que la balanza se inclina hacia el sí, aunque el resultado final sigue dependiendo de lo que hagas con esto.';
+  } else if(score <= -2){
+    tendencia = 'Más cerca del no';
+    matiz = 'Hay más señales de traba que de impulso en esta combinación, por eso la balanza se inclina hacia el no por ahora, no como algo cerrado para siempre sino como una tendencia actual.';
+  } else {
+    tendencia = 'Está dividido, depende de vos';
+    matiz = 'Las cartas muestran señales encontradas: ni un sí ni un no claro, sino una situación que todavía depende de decisiones que están en tus manos.';
+  }
+  return { tendencia, matiz };
+}
+
+function generateReading(question, theme, cards, yesNo){
+  const key = THEME_KEYS[theme] || 'general';
+
+  if(yesNo){
+    const veredicto = buildVeredicto(cards);
+    const consejo = cap(CARD_DATA[cards[2].name].consejo) + '. Además, ' + CARD_DATA[cards[0].name].esencia + ' es algo a tener presente en el camino.';
+    return { tema: question, veredicto: veredicto, consejo: consejo };
+  }
+
+  const posiciones = ['Situación actual', 'Desafío o influencia', 'Consejo y tendencia'];
+  const cartasOut = cards.map((c, i) => {
+    const d = CARD_DATA[c.name];
+    const texto = i < 2 ? POSITION_TEXT[i][key](d.esencia) : POSITION_TEXT[i][key](d.consejo);
+    return { nombre: c.name, posicion: posiciones[i], interpretacion: texto };
   });
-  if(!response.ok){
-    if(!CONFIG.API_KEY){
-      throw new Error('Falta configurar la API_KEY para usar esta página fuera de Claude.ai.');
-    }
-    throw new Error('La API respondió con un error (' + response.status + ').');
-  }
-  const data = await response.json();
-  const textBlock = (data.content || []).find(b => b.type === 'text');
-  if(!textBlock) throw new Error('sin respuesta');
-  const cleaned = textBlock.text.replace(/```json|```/g, '').trim();
-  return JSON.parse(cleaned);
+
+  return {
+    tema: question,
+    cartas: cartasOut,
+    lectura_conjunta: buildLecturaConjunta(cards),
+    consejo_practico: cards.map(c => cap(CARD_DATA[c.name].consejo) + '.'),
+    pregunta_reflexion: pick(REFLEXIONES)
+  };
 }
 
 // ---------- Render de la lectura ----------
