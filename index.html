@@ -1,0 +1,967 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tres cartas, una pregunta</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Karla:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg-a:#fbf8f4;
+    --bg-b:#f1e9f9;
+    --panel-bg:#ffffff;
+    --panel-border:#e5d9f2;
+    --panel-border-2:#d9c8ed;
+    --lavender:#b9a3d9;
+    --lavender-deep:#6f5296;
+    --wisteria:#9678bd;
+    --ink-text:#3a3050;
+    --muted:#948aa8;
+    --sage:#93a87e;
+    --blush:#c7a3e0;
+    --rose:#8a4f8f;
+    --card-front-bg:#fffdf9;
+    --card-back-1:#efe3f7;
+    --card-back-2:#e2cdec;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:
+      radial-gradient(ellipse at 12% -8%, #f4e9fb 0%, transparent 50%),
+      radial-gradient(ellipse at 92% 8%, #eef2e3 0%, transparent 45%),
+      radial-gradient(ellipse at 80% 105%, #f3e4f0 0%, transparent 50%),
+      var(--bg-a);
+    color:var(--ink-text);
+    font-family:'Karla',sans-serif;
+    min-height:100vh;
+    line-height:1.55;
+  }
+  .stage{
+    max-width:660px;
+    margin:0 auto;
+    padding:40px 24px 40px;
+  }
+  /* ---------- Hero ---------- */
+  .hero{
+    text-align:center;
+    opacity:0;
+    animation:rise 0.9s ease-out forwards;
+  }
+  @keyframes rise{
+    from{opacity:0; transform:translateY(10px);}
+    to{opacity:1; transform:translateY(0);}
+  }
+  .botanical-hero{
+    width:100%;
+    height:auto;
+    max-height:110px;
+    display:block;
+    margin:0 auto 8px;
+  }
+  .hero h1{
+    font-family:'Cormorant Garamond',serif;
+    font-weight:500;
+    font-size:clamp(2.3rem, 6vw, 3rem);
+    letter-spacing:0.01em;
+    margin:0 0 14px;
+    color:var(--lavender-deep);
+  }
+  .hero .subtitle{
+    color:var(--muted);
+    font-size:1.02rem;
+    max-width:440px;
+    margin:0 auto;
+  }
+  .divider{
+    width:1px;
+    height:36px;
+    background:linear-gradient(var(--wisteria), transparent);
+    margin:28px auto;
+  }
+  /* ---------- Form panel ---------- */
+  .panel{
+    background:var(--panel-bg);
+    border:1px solid var(--panel-border);
+    border-radius:12px;
+    padding:28px 26px 26px;
+    box-shadow:0 18px 40px -28px rgba(111,82,150,0.35);
+  }
+  .panel label{
+    display:block;
+    font-family:'Cormorant Garamond',serif;
+    font-size:1.3rem;
+    margin-bottom:14px;
+    color:var(--lavender-deep);
+  }
+  .chips{
+    display:flex;
+    flex-wrap:wrap;
+    gap:8px;
+    margin-bottom:16px;
+  }
+  .chip{
+    background:transparent;
+    border:1px solid var(--panel-border-2);
+    color:var(--muted);
+    padding:7px 14px;
+    border-radius:20px;
+    font-family:'Karla',sans-serif;
+    font-size:0.85rem;
+    cursor:pointer;
+    transition:border-color 0.2s, color 0.2s, background 0.2s;
+  }
+  .chip:hover{border-color:var(--wisteria); color:var(--lavender-deep);}
+  .chip.active{border-color:var(--wisteria); color:var(--lavender-deep); background:rgba(150,120,189,0.1);}
+  textarea{
+    width:100%;
+    background:#faf7fc;
+    border:1px solid var(--panel-border-2);
+    border-radius:8px;
+    color:var(--ink-text);
+    font-family:'Karla',sans-serif;
+    font-size:0.98rem;
+    padding:14px;
+    resize:vertical;
+    min-height:78px;
+  }
+  textarea:focus, .chip:focus, button:focus{
+    outline:2px solid var(--wisteria);
+    outline-offset:2px;
+  }
+  textarea::placeholder{color:#b3a8c4;}
+  .yesno-row{ margin-top:12px; }
+  .yesno-chip{ font-size:0.82rem; }
+  .yesno-chip.active{
+    border-color:var(--rose);
+    color:var(--rose);
+    background:rgba(169,82,122,0.08);
+  }
+  .panel .hint{
+    min-height:1.2em;
+    font-size:0.85rem;
+    color:var(--rose);
+    margin:8px 0 0;
+  }
+  button.primary{
+    margin-top:16px;
+    width:100%;
+    background:var(--lavender-deep);
+    color:#fffdf9;
+    border:none;
+    border-radius:8px;
+    padding:14px;
+    font-family:'Karla',sans-serif;
+    font-weight:600;
+    font-size:1rem;
+    letter-spacing:0.02em;
+    cursor:pointer;
+    transition:filter 0.15s, transform 0.15s;
+  }
+  button.primary:hover{filter:brightness(1.08);}
+  button.primary:active{transform:scale(0.99);}
+  button.primary:disabled{opacity:0.55; cursor:default;}
+  button.ghost{
+    background:transparent;
+    border:1px solid var(--panel-border-2);
+    color:var(--muted);
+    border-radius:8px;
+    padding:10px 18px;
+    font-family:'Karla',sans-serif;
+    font-size:0.92rem;
+    cursor:pointer;
+  }
+  button.ghost:hover{border-color:var(--wisteria); color:var(--lavender-deep);}
+  /* ---------- Cards ---------- */
+  .hidden{display:none !important;}
+  .cards-section{margin-top:44px;}
+  .cards{
+    display:flex;
+    gap:18px;
+    justify-content:center;
+    flex-wrap:wrap;
+  }
+  .card-slot{
+    width:150px;
+    text-align:center;
+  }
+  .card-viewport{perspective:1400px;}
+  .card{
+    position:relative;
+    width:100%;
+    height:214px;
+    transform-style:preserve-3d;
+    transition:transform 0.85s cubic-bezier(.4,.2,.2,1);
+  }
+  .card.flipped{transform:rotateY(180deg);}
+  .card-face{
+    position:absolute;
+    inset:0;
+    backface-visibility:hidden;
+    border-radius:9px;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    padding:12px;
+  }
+  .card-back{
+    background:linear-gradient(160deg, var(--card-back-1), var(--card-back-2));
+    border:1px solid var(--panel-border-2);
+    box-shadow:inset 0 0 0 4px rgba(150,120,189,0.14);
+  }
+  .card-back .glyph{width:36px; height:36px;}
+  .card-back .glyph *{
+    stroke:var(--lavender-deep); stroke-width:1.4; fill:none;
+  }
+  .card-back .glyph .fill-blush{ fill:var(--blush); stroke:none; }
+  .card-front{
+    background:linear-gradient(160deg, var(--card-front-bg), #f6eefb);
+    border:1px solid var(--panel-border-2);
+    box-shadow:inset 0 0 0 5px rgba(255,255,255,0.5), inset 0 0 0 6px rgba(150,120,189,0.25);
+    transform:rotateY(180deg);
+    color:var(--ink-text);
+  }
+  .card-front .numeral{
+    font-family:'Cormorant Garamond',serif;
+    font-style:italic;
+    font-size:0.82rem;
+    color:var(--wisteria);
+    margin-bottom:4px;
+  }
+  .card-front .glyph{width:38px; height:38px; margin:2px 0 8px;}
+  .card-front .glyph line, .card-front .glyph circle, .card-front .glyph path{
+    stroke:var(--lavender-deep); stroke-width:1.6; fill:none;
+  }
+  .card-front .card-name{
+    font-family:'Cormorant Garamond',serif;
+    font-weight:600;
+    font-size:1.05rem;
+    line-height:1.15;
+  }
+  .card-position{
+    margin-top:12px;
+    font-family:'Cormorant Garamond',serif;
+    font-style:italic;
+    color:var(--wisteria);
+    font-size:0.95rem;
+  }
+  .status-text{
+    text-align:center;
+    color:var(--muted);
+    font-size:0.9rem;
+    margin-top:22px;
+    min-height:1.2em;
+  }
+  /* ---------- Reading ---------- */
+  .reading{
+    margin-top:46px;
+    opacity:0;
+    animation:rise 0.7s ease-out forwards;
+  }
+  .reading .tema{
+    text-align:center;
+    font-family:'Cormorant Garamond',serif;
+    font-style:italic;
+    font-size:1.15rem;
+    color:var(--lavender-deep);
+    max-width:480px;
+    margin:0 auto 34px;
+  }
+  .veredicto{
+    text-align:center;
+    margin:0 auto 30px;
+    padding:16px 22px;
+    border:1px solid var(--panel-border-2);
+    border-radius:14px;
+    background:linear-gradient(160deg,#f9f2fc,#ffffff);
+  }
+  .veredicto .tendencia{
+    font-family:'Cormorant Garamond',serif;
+    font-weight:600;
+    font-size:1.4rem;
+    color:var(--rose);
+  }
+  .veredicto .matiz{
+    margin-top:6px;
+    font-size:0.9rem;
+    color:var(--muted);
+  }
+  .reading h2{
+    font-family:'Cormorant Garamond',serif;
+    font-weight:500;
+    font-size:1.5rem;
+    color:var(--wisteria);
+    margin:0 0 12px;
+    text-align:center;
+  }
+  .card-reading{
+    margin-bottom:22px;
+    padding-bottom:22px;
+    border-bottom:1px solid var(--panel-border);
+  }
+  .card-reading:last-child{border-bottom:none;}
+  .card-reading .ct{
+    font-family:'Cormorant Garamond',serif;
+    font-size:1.15rem;
+    color:var(--lavender-deep);
+    margin-bottom:2px;
+  }
+  .card-reading .cp{
+    font-size:0.82rem;
+    color:var(--muted);
+    margin-bottom:8px;
+  }
+  .card-reading p{margin:0; color:var(--ink-text);}
+  .block{
+    background:var(--panel-bg);
+    border:1px solid var(--panel-border);
+    border-left:2px solid var(--wisteria);
+    border-radius:0 8px 8px 0;
+    padding:20px 22px;
+    margin:30px 0;
+  }
+  .block p{margin:0; color:var(--ink-text);}
+  ul.consejos{
+    list-style:none;
+    margin:30px 0;
+    padding:0;
+  }
+  ul.consejos li{
+    position:relative;
+    padding-left:22px;
+    margin-bottom:12px;
+    color:var(--ink-text);
+  }
+  ul.consejos li::before{
+    content:'';
+    position:absolute;
+    left:0; top:9px;
+    width:8px; height:1px;
+    background:var(--wisteria);
+  }
+  .reflexion{
+    text-align:center;
+    font-family:'Cormorant Garamond',serif;
+    font-style:italic;
+    font-size:1.3rem;
+    color:var(--lavender-deep);
+    max-width:480px;
+    margin:36px auto 8px;
+  }
+  .again{
+    text-align:center;
+    margin-top:30px;
+  }
+  .error-box{
+    text-align:center;
+    color:var(--muted);
+    margin-top:20px;
+  }
+  /* ---------- Footer ---------- */
+  .disclaimer{
+    margin-top:56px;
+    text-align:center;
+    font-size:0.78rem;
+    color:#a89bc0;
+    max-width:420px;
+    margin-left:auto;
+    margin-right:auto;
+    line-height:1.6;
+  }
+  @media (prefers-reduced-motion: reduce){
+    .hero, .reading{animation:none; opacity:1;}
+    .card{transition:none;}
+  }
+  /* ---------- Celulares (iPhone y Android) ---------- */
+  @media (max-width: 480px){
+    .stage{ padding:28px 16px 32px; }
+    .hero h1{ font-size:1.85rem; }
+    .hero .subtitle{ font-size:0.94rem; }
+    .botanical-hero{ max-height:78px; }
+    .panel{ padding:22px 18px 20px; }
+    .chip{ font-size:0.8rem; padding:6px 12px; }
+    .cards{ gap:8px; flex-wrap:nowrap; }
+    .card-slot{ width:auto; flex:1 1 0; min-width:0; }
+    .card{ height:168px; }
+    .card-face{ padding:8px; }
+    .card-front .glyph, .card-back .glyph{ width:26px; height:26px; margin:0 0 6px; }
+    .card-front .numeral{ font-size:0.7rem; }
+    .card-front .card-name{ font-size:0.82rem; }
+    .card-position{ font-size:0.78rem; margin-top:8px; }
+    .reading .tema{ font-size:1.05rem; }
+    .reading h2{ font-size:1.3rem; }
+    .veredicto .tendencia{ font-size:1.2rem; }
+    .reflexion{ font-size:1.15rem; }
+  }
+  @media (max-width: 360px){
+    .card{ height:150px; }
+    .card-front .glyph, .card-back .glyph{ width:22px; height:22px; }
+    .card-front .card-name{ font-size:0.75rem; }
+  }
+</style>
+</head>
+<body>
+<div class="stage">
+
+  <header class="hero">
+    <svg class="botanical-hero" viewBox="0 0 660 100" preserveAspectRatio="xMidYMid meet" aria-hidden="true">
+      <path d="M0,22 C90,44 150,4 250,26 C350,48 410,10 500,28 C560,40 610,16 660,24" stroke="var(--sage)" stroke-width="1.4" fill="none" opacity="0.65"/>
+      <g opacity="0.9">
+        <ellipse cx="95" cy="34" rx="6" ry="8" fill="var(--wisteria)"/>
+        <ellipse cx="91" cy="45" rx="5.5" ry="7.5" fill="var(--lavender)"/>
+        <ellipse cx="97" cy="55" rx="5" ry="7" fill="var(--lavender)"/>
+        <ellipse cx="92" cy="65" rx="4.2" ry="6" fill="var(--blush)"/>
+        <ellipse cx="96" cy="74" rx="3.4" ry="5" fill="var(--blush)"/>
+      </g>
+      <g opacity="0.9">
+        <ellipse cx="565" cy="32" rx="6" ry="8" fill="var(--wisteria)"/>
+        <ellipse cx="569" cy="43" rx="5.5" ry="7.5" fill="var(--lavender)"/>
+        <ellipse cx="563" cy="53" rx="5" ry="7" fill="var(--lavender)"/>
+        <ellipse cx="568" cy="63" rx="4.2" ry="6" fill="var(--blush)"/>
+        <ellipse cx="564" cy="72" rx="3.4" ry="5" fill="var(--blush)"/>
+      </g>
+      <g transform="translate(255,42)">
+        <g fill="#fffdf9" stroke="var(--lavender-deep)" stroke-width="1">
+          <path d="M0,0 C5,-9 5,-20 0,-24 C-5,-20 -5,-9 0,0 Z" transform="rotate(0)"/>
+          <path d="M0,0 C5,-9 5,-20 0,-24 C-5,-20 -5,-9 0,0 Z" transform="rotate(60)"/>
+          <path d="M0,0 C5,-9 5,-20 0,-24 C-5,-20 -5,-9 0,0 Z" transform="rotate(120)"/>
+          <path d="M0,0 C5,-9 5,-20 0,-24 C-5,-20 -5,-9 0,0 Z" transform="rotate(180)"/>
+          <path d="M0,0 C5,-9 5,-20 0,-24 C-5,-20 -5,-9 0,0 Z" transform="rotate(240)"/>
+          <path d="M0,0 C5,-9 5,-20 0,-24 C-5,-20 -5,-9 0,0 Z" transform="rotate(300)"/>
+        </g>
+        <circle cx="0" cy="0" r="3.2" fill="var(--blush)"/>
+      </g>
+      <g transform="translate(415,58) scale(0.8)">
+        <g fill="#fffdf9" stroke="var(--lavender-deep)" stroke-width="1">
+          <path d="M0,0 C5,-9 5,-20 0,-24 C-5,-20 -5,-9 0,0 Z" transform="rotate(0)"/>
+          <path d="M0,0 C5,-9 5,-20 0,-24 C-5,-20 -5,-9 0,0 Z" transform="rotate(60)"/>
+          <path d="M0,0 C5,-9 5,-20 0,-24 C-5,-20 -5,-9 0,0 Z" transform="rotate(120)"/>
+          <path d="M0,0 C5,-9 5,-20 0,-24 C-5,-20 -5,-9 0,0 Z" transform="rotate(180)"/>
+          <path d="M0,0 C5,-9 5,-20 0,-24 C-5,-20 -5,-9 0,0 Z" transform="rotate(240)"/>
+          <path d="M0,0 C5,-9 5,-20 0,-24 C-5,-20 -5,-9 0,0 Z" transform="rotate(300)"/>
+        </g>
+        <circle cx="0" cy="0" r="3.2" fill="var(--blush)"/>
+      </g>
+    </svg>
+    <h1>Tres cartas, una pregunta</h1>
+    <p class="subtitle">Una lectura de tarot Rider&#8209;Waite&#8209;Smith pensada para pensar mejor, no para adivinar. Vos seguís decidiendo.</p>
+  </header>
+
+  <div class="divider"></div>
+
+  <section class="panel" id="form-section">
+    <label for="question">¿Qué querés mirar hoy?</label>
+    <div class="chips" id="chips"></div>
+    <textarea id="question" rows="3" placeholder="Por ejemplo: ¿qué necesito ver hoy en mi trabajo?"></textarea>
+    <div class="yesno-row">
+      <button type="button" class="chip yesno-chip" id="yesno-chip">¿Es una pregunta de sí o no?</button>
+    </div>
+    <p class="hint" id="hint"></p>
+    <button class="primary" id="draw-btn">Tirar las cartas</button>
+  </section>
+
+  <section class="cards-section hidden" id="cards-section">
+    <div class="cards" id="cards-row"></div>
+    <p class="status-text" id="status-text"></p>
+  </section>
+
+  <section class="reading hidden" id="reading-section"></section>
+
+  <footer class="disclaimer">
+    Esta lectura es una herramienta simbólica de orientación, no una certeza ni un reemplazo de asesoría médica, legal o financiera profesional. Las decisiones importantes siguen siendo tuyas.
+  </footer>
+</div>
+
+<script>
+/* =======================================================================
+   MOTOR DE LECTURA LOCAL (sin API, sin clave, sin conexión a internet)
+   -----------------------------------------------------------------------
+   Esta versión arma la lectura combinando, con reglas fijas, el
+   significado de cada una de las 78 cartas (adaptado al tema elegido y
+   a la posición que ocupa) más el análisis del conjunto (arcanos
+   mayores vs. menores, palo dominante). No es tan a medida palabra por
+   palabra como una lectura generada por IA, pero funciona 100% sola:
+   se puede publicar en GitHub Pages o cualquier hosting estático tal
+   cual, sin configurar nada.
+   ======================================================================= */
+
+// ---------- Mazo ----------
+const MAJORS = [
+  {n:'0', name:'El Loco'}, {n:'I', name:'El Mago'}, {n:'II', name:'La Sacerdotisa'},
+  {n:'III', name:'La Emperatriz'}, {n:'IV', name:'El Emperador'}, {n:'V', name:'El Hierofante'},
+  {n:'VI', name:'Los Enamorados'}, {n:'VII', name:'El Carro'}, {n:'VIII', name:'La Fuerza'},
+  {n:'IX', name:'El Ermitaño'}, {n:'X', name:'La Rueda de la Fortuna'}, {n:'XI', name:'La Justicia'},
+  {n:'XII', name:'El Colgado'}, {n:'XIII', name:'La Muerte'}, {n:'XIV', name:'La Templanza'},
+  {n:'XV', name:'El Diablo'}, {n:'XVI', name:'La Torre'}, {n:'XVII', name:'La Estrella'},
+  {n:'XVIII', name:'La Luna'}, {n:'XIX', name:'El Sol'}, {n:'XX', name:'El Juicio'}, {n:'XXI', name:'El Mundo'}
+];
+const SUITS = ['Bastos','Copas','Espadas','Oros'];
+const RANKS = ['As','Dos','Tres','Cuatro','Cinco','Seis','Siete','Ocho','Nueve','Diez','Sota','Caballero','Reina','Rey'];
+
+function buildDeck(){
+  const deck = MAJORS.map(m => ({type:'major', name:m.name, numeral:m.n}));
+  SUITS.forEach(suit => {
+    RANKS.forEach(rank => deck.push({type:'minor', suit, rank, name: rank + ' de ' + suit}));
+  });
+  return deck;
+}
+function shuffle(arr){
+  const a = arr.slice();
+  for(let i=a.length-1;i>0;i--){
+    const j = Math.floor(Math.random()*(i+1));
+    [a[i],a[j]]=[a[j],a[i]];
+  }
+  return a;
+}
+
+// ---------- Diccionario de significados (offline) ----------
+// esencia: usada en "Situación actual" y "Desafío o influencia"
+// consejo: usada en "Consejo y tendencia" y como ítem de la lista de consejos prácticos
+// pol: 'pos' | 'neg' | 'neu' -> polaridad orientativa para el modo sí/no
+const CARD_DATA = {
+  'El Loco': {esencia:'comienzos espontáneos, un salto de fe hacia lo desconocido', consejo:'animate a dar el primer paso, aunque no tengas todo resuelto', pol:'neu'},
+  'El Mago': {esencia:'voluntad y recursos disponibles para concretar una idea', consejo:'usá las herramientas que ya tenés, no esperes más para empezar', pol:'pos'},
+  'La Sacerdotisa': {esencia:'intuición y un saber que todavía no se dice en voz alta', consejo:'hacé una pausa antes de actuar y escuchá lo que tu intuición te dice', pol:'neu'},
+  'La Emperatriz': {esencia:'abundancia y cuidado, algo que está en pleno crecimiento', consejo:'date permiso de disfrutar y de cuidar lo que estás construyendo', pol:'pos'},
+  'El Emperador': {esencia:'estructura y límites claros que sostienen la situación', consejo:'poné reglas claras y sostenelas con constancia', pol:'pos'},
+  'El Hierofante': {esencia:'aprendizaje guiado, apoyarte en marcos que ya conocés', consejo:'buscá el consejo de alguien con más experiencia, o lo que ya sabés que funciona', pol:'pos'},
+  'Los Enamorados': {esencia:'una elección desde los valores propios, afinidad genuina', consejo:'elegí desde lo que realmente valorás, no desde la presión externa', pol:'pos'},
+  'El Carro': {esencia:'avance con determinación entre fuerzas que tiran para distintos lados', consejo:'mantené el rumbo aunque tengas que equilibrar intereses distintos', pol:'pos'},
+  'La Fuerza': {esencia:'una fuerza interior serena para manejar algo intenso', consejo:'respondé con calma y firmeza, no con imposición', pol:'pos'},
+  'El Ermitaño': {esencia:'introspección, necesidad de distancia para buscar respuestas propias', consejo:'tomate un tiempo a solas antes de decidir', pol:'neu'},
+  'La Rueda de la Fortuna': {esencia:'un ciclo que cambia, algo se mueve más allá de tu control', consejo:'acompañá el cambio en vez de resistirlo', pol:'pos'},
+  'La Justicia': {esencia:'equilibrio y consecuencias claras frente a una decisión', consejo:'sé honesto con vos mismo/a y sopesá bien antes de decidir', pol:'neu'},
+  'El Colgado': {esencia:'una pausa forzada que invita a mirar la situación desde otro ángulo', consejo:'esperá antes de actuar y probá ver esto desde otra perspectiva', pol:'neg'},
+  'La Muerte': {esencia:'el cierre de una etapa que da lugar a otra distinta', consejo:'soltá lo que ya cumplió su ciclo para que pueda entrar algo nuevo', pol:'neg'},
+  'La Templanza': {esencia:'equilibrio gradual, mezclar en vez de irte a un extremo', consejo:'buscá el término medio y avanzá de a poco', pol:'pos'},
+  'El Diablo': {esencia:'una atadura o un patrón repetido que limita más de lo que parece', consejo:'identificá qué te está atando y animate a cuestionarlo', pol:'neg'},
+  'La Torre': {esencia:'una revelación brusca, algo que se cae para dar paso a lo real', consejo:'no te aferres a lo que ya no sostiene, aunque el cambio incomode', pol:'neg'},
+  'La Estrella': {esencia:'esperanza renovada, confianza después de un momento difícil', consejo:'confiá en que lo peor ya pasó y dejate guiar por lo que te inspira', pol:'pos'},
+  'La Luna': {esencia:'una zona confusa, emociones o información que todavía no terminan de definirse', consejo:'no tomes decisiones grandes hasta que el panorama esté más claro', pol:'neg'},
+  'El Sol': {esencia:'claridad y vitalidad, algo que se muestra tal cual es', consejo:'mostrate tal cual sos, este es un buen momento para eso', pol:'pos'},
+  'El Juicio': {esencia:'un llamado a revisar y tomar conciencia de algo importante', consejo:'hacé un balance honesto y animate a dar el paso que ese balance pide', pol:'pos'},
+  'El Mundo': {esencia:'un ciclo que se completa, logro e integración', consejo:'reconocé lo que lograste antes de lanzarte a lo próximo', pol:'pos'},
+
+  'As de Bastos': {esencia:'una chispa nueva, ganas de empezar algo con energía', consejo:'aprovechá el impulso inicial y dale forma concreta', pol:'pos'},
+  'Dos de Bastos': {esencia:'mirar más allá del horizonte y planificar el próximo paso', consejo:'animate a pensar en grande y trazar un plan', pol:'pos'},
+  'Tres de Bastos': {esencia:'lo que sembraste empieza a expandirse, mirada puesta en lo que viene', consejo:'mantené la vista en el mediano plazo y seguí expandiendo', pol:'pos'},
+  'Cuatro de Bastos': {esencia:'un festejo merecido, estabilidad después de un esfuerzo', consejo:'date el gusto de celebrar un logro antes de seguir', pol:'pos'},
+  'Cinco de Bastos': {esencia:'tensión o competencia, distintas voluntades chocando entre sí', consejo:'buscá el punto en común en vez de entrar en la pelea', pol:'neg'},
+  'Seis de Bastos': {esencia:'reconocimiento, un esfuerzo que empieza a dar frutos visibles', consejo:'animate a mostrar lo que lograste, te lo ganaste', pol:'pos'},
+  'Siete de Bastos': {esencia:'sostener una posición, defender lo propio frente a la presión', consejo:'mantené tu postura, tenés más terreno ganado del que pensás', pol:'neu'},
+  'Ocho de Bastos': {esencia:'movimiento rápido, novedades que llegan sin demora', consejo:'actuá pronto, las cosas se están moviendo rápido', pol:'pos'},
+  'Nueve de Bastos': {esencia:'cansancio pero con la guardia en alto, casi al final del camino', consejo:'no bajes los brazos, estás más cerca de la meta de lo que sentís', pol:'neu'},
+  'Diez de Bastos': {esencia:'una carga pesada, demasiadas responsabilidades encima', consejo:'delegá o soltá algo de lo que estás cargando en soledad', pol:'neg'},
+  'Sota de Bastos': {esencia:'curiosidad y entusiasmo, ganas de explorar algo nuevo', consejo:'explorá esa idea nueva con la mente abierta', pol:'neu'},
+  'Caballero de Bastos': {esencia:'impulso y acción rápida, a veces sin medir del todo el riesgo', consejo:'actuá con decisión, pero no te olvides de mirar antes de saltar', pol:'pos'},
+  'Reina de Bastos': {esencia:'seguridad en una misma, calidez y determinación a la vez', consejo:'confiá en tu propia seguridad para sostener lo que querés', pol:'pos'},
+  'Rey de Bastos': {esencia:'liderazgo con visión, capacidad de inspirar y sostener proyectos', consejo:'asumí el liderazgo de la situación con visión de conjunto', pol:'pos'},
+
+  'As de Copas': {esencia:'un sentimiento nuevo que se abre, una emoción que empieza a fluir', consejo:'dejá que ese sentimiento nuevo se exprese sin apurarlo', pol:'pos'},
+  'Dos de Copas': {esencia:'una conexión mutua, un encuentro genuino entre dos partes', consejo:'cuidá esa conexión desde la reciprocidad', pol:'pos'},
+  'Tres de Copas': {esencia:'celebración compartida, el valor del vínculo con otros', consejo:'compartí este momento con quienes te acompañan', pol:'pos'},
+  'Cuatro de Copas': {esencia:'cierto hastío o desconexión frente a algo bueno que no se está viendo', consejo:'prestá atención a lo que ya tenés antes de buscar en otro lado', pol:'neg'},
+  'Cinco de Copas': {esencia:'una pérdida que pesa, la mirada puesta en lo que se derramó', consejo:'date permiso de sentir la pérdida, pero girá la mirada hacia lo que sigue en pie', pol:'neg'},
+  'Seis de Copas': {esencia:'nostalgia, algo del pasado que vuelve o que enseña', consejo:'tomá lo bueno del pasado sin quedarte a vivir ahí', pol:'neu'},
+  'Siete de Copas': {esencia:'muchas opciones y algo de fantasía, hace falta elegir con los pies en la tierra', consejo:'elegí una opción concreta en vez de quedarte soñando con todas', pol:'neu'},
+  'Ocho de Copas': {esencia:'alejarse de algo que ya no llena, aunque cueste', consejo:'animate a dejar atrás lo que ya no te completa, aunque implique incertidumbre', pol:'neg'},
+  'Nueve de Copas': {esencia:'satisfacción, un deseo que se está cumpliendo', consejo:'disfrutá este momento de bienestar, te lo merecés', pol:'pos'},
+  'Diez de Copas': {esencia:'armonía plena, un vínculo o una vida que se siente completa', consejo:'cuidá y sostené esa armonía que ya construiste', pol:'pos'},
+  'Sota de Copas': {esencia:'una propuesta emocional tierna, sensibilidad que se anima a expresarse', consejo:'animate a expresar lo que sentís, aunque sea con timidez', pol:'neu'},
+  'Caballero de Copas': {esencia:'un acercamiento romántico o idealista, seguir al corazón', consejo:'seguí a tu corazón, pero sin perder de vista lo real', pol:'pos'},
+  'Reina de Copas': {esencia:'empatía profunda, contención emocional hacia una misma y hacia otros', consejo:'confiá en tu sensibilidad como guía, sin descuidarte a vos', pol:'pos'},
+  'Rey de Copas': {esencia:'equilibrio emocional, manejar los sentimientos con madurez', consejo:'respondé desde la calma emocional, no desde el impulso', pol:'pos'},
+
+  'As de Espadas': {esencia:'una idea clara, un momento de lucidez o de verdad que se impone', consejo:'actuá con esa claridad recién ganada, decilo o hacelo con precisión', pol:'pos'},
+  'Dos de Espadas': {esencia:'una decisión postergada, un impasse entre dos posturas', consejo:'no sigas evitando la decisión, aunque sea incómoda', pol:'neg'},
+  'Tres de Espadas': {esencia:'un dolor o una desilusión que hay que atravesar', consejo:'date tiempo para procesar el dolor antes de seguir', pol:'neg'},
+  'Cuatro de Espadas': {esencia:'una pausa necesaria para descansar la mente antes de retomar', consejo:'date un respiro real antes de volver a la acción', pol:'neu'},
+  'Cinco de Espadas': {esencia:'un conflicto donde nadie gana del todo, algo que sale caro', consejo:'evaluá si vale la pena seguir peleando esta batalla en particular', pol:'neg'},
+  'Seis de Espadas': {esencia:'un traslado hacia algo más tranquilo, dejar atrás la turbulencia', consejo:'avanzá hacia lo que te dé más calma, aunque sea de a poco', pol:'pos'},
+  'Siete de Espadas': {esencia:'una estrategia poco transparente, algo que se maneja a solas o a escondidas', consejo:'revisá si estás siendo del todo honesto/a en esta situación', pol:'neg'},
+  'Ocho de Espadas': {esencia:'sentirse atrapado/a, aunque la salida esté más cerca de lo que parece', consejo:'cuestioná esa sensación de no tener salida, probablemente tenés más margen del que creés', pol:'neg'},
+  'Nueve de Espadas': {esencia:'preocupación que crece de noche, pensamientos que dan vueltas', consejo:'no te quedes solo/a con esa preocupación, hablalo con alguien', pol:'neg'},
+  'Diez de Espadas': {esencia:'un final doloroso pero definitivo, tocar fondo para poder empezar de nuevo', consejo:'aceptá que este ciclo terminó, así podés empezar el siguiente', pol:'neg'},
+  'Sota de Espadas': {esencia:'curiosidad mental, ganas de investigar o decir algo con franqueza', consejo:'hacé la pregunta directa que estás evitando', pol:'neu'},
+  'Caballero de Espadas': {esencia:'avance rápido y directo, a veces sin demasiado filtro', consejo:'actuá con decisión, pero cuidá las formas al decirlo', pol:'neu'},
+  'Reina de Espadas': {esencia:'claridad mental, decir las cosas como son sin rodeos', consejo:'sé honesto/a y directo/a, sin necesidad de ser duro/a', pol:'neu'},
+  'Rey de Espadas': {esencia:'juicio objetivo, decisiones basadas en la razón más que en la emoción', consejo:'analizá la situación con la cabeza fría antes de decidir', pol:'neu'},
+
+  'As de Oros': {esencia:'una oportunidad concreta, una semilla material que se puede cultivar', consejo:'aprovechá esta oportunidad concreta que se presenta', pol:'pos'},
+  'Dos de Oros': {esencia:'hacer malabares entre dos prioridades, adaptarse a los cambios', consejo:'organizá tus prioridades, aunque tengas que ajustar sobre la marcha', pol:'neu'},
+  'Tres de Oros': {esencia:'trabajo en equipo, una habilidad que empieza a ser reconocida', consejo:'sumá a otros a lo que estás construyendo, no lo hagas en soledad', pol:'pos'},
+  'Cuatro de Oros': {esencia:'necesidad de seguridad, quizás demasiado apego a lo que ya se tiene', consejo:'revisá si estás reteniendo por seguridad o por miedo a soltar', pol:'neu'},
+  'Cinco de Oros': {esencia:'una carencia real o percibida, sentirse afuera de algo', consejo:'buscá ayuda o recursos que quizás no estás viendo todavía', pol:'neg'},
+  'Seis de Oros': {esencia:'un intercambio, dar y recibir en cierto equilibrio', consejo:'fijate si la balanza entre dar y recibir está pareja', pol:'neu'},
+  'Siete de Oros': {esencia:'una pausa para evaluar el esfuerzo invertido antes de seguir', consejo:'tomate un momento para evaluar si vale la pena seguir invirtiendo ahí', pol:'neu'},
+  'Ocho de Oros': {esencia:'dedicación y trabajo constante, perfeccionar un oficio', consejo:'seguí puliendo lo que estás haciendo, el esfuerzo constante va a dar resultado', pol:'pos'},
+  'Nueve de Oros': {esencia:'independencia lograda con esfuerzo propio, disfrutar de lo construido', consejo:'disfrutá de lo que lograste con tu propio esfuerzo', pol:'pos'},
+  'Diez de Oros': {esencia:'estabilidad a largo plazo, algo que trasciende lo individual', consejo:'pensá en el largo plazo y en lo que dejás para después', pol:'pos'},
+  'Sota de Oros': {esencia:'un proyecto concreto que recién arranca, ganas de aprender algo práctico', consejo:'dale un primer paso concreto y práctico a esa idea', pol:'neu'},
+  'Caballero de Oros': {esencia:'avance lento pero seguro, constancia por sobre la velocidad', consejo:'priorizá la constancia por sobre la urgencia', pol:'pos'},
+  'Reina de Oros': {esencia:'cuidado práctico, generosidad con los pies en la tierra', consejo:'cuidá lo material y a los tuyos con los pies en la tierra', pol:'pos'},
+  'Rey de Oros': {esencia:'solidez y abundancia construida con el tiempo', consejo:'tomá decisiones desde la solidez que ya construiste', pol:'pos'}
+};
+
+// ---------- Iconografía (SVG original, sin reproducir ilustraciones existentes) ----------
+function majorGlyph(){
+  let rays='';
+  for(let a=0;a<360;a+=45){
+    rays += '<line x1="30" y1="13" x2="30" y2="20" transform="rotate('+a+' 30 30)"/>';
+  }
+  return '<svg viewBox="0 0 60 60" class="glyph"><circle cx="30" cy="30" r="9"/>'+rays+'</svg>';
+}
+function lilyBackGlyph(){
+  // flor simple de seis pétalos, usada en el dorso de todas las cartas
+  let petals='';
+  for(let a=0;a<360;a+=60){
+    petals += '<path d="M30,30 C34,21 34,10 30,6 C26,10 26,21 30,30 Z" transform="rotate('+a+' 30 30)"/>';
+  }
+  return '<svg viewBox="0 0 60 60" class="glyph">'+petals+'<circle cx="30" cy="30" r="2.6" class="fill-blush"/></svg>';
+}
+function suitGlyph(suit){
+  const map = {
+    Bastos: '<svg viewBox="0 0 60 60" class="glyph"><line x1="30" y1="8" x2="30" y2="52"/><path d="M30 8 l-6 9 M30 8 l6 9"/><path d="M30 21 l-5 8 M30 21 l5 8"/><path d="M30 34 l-5 8 M30 34 l5 8"/></svg>',
+    Copas: '<svg viewBox="0 0 60 60" class="glyph"><path d="M17 12 h26 l-4.5 17 a9 9 0 0 1 -17 0 z"/><line x1="30" y1="29" x2="30" y2="43"/><line x1="19" y1="47" x2="41" y2="47"/></svg>',
+    Espadas: '<svg viewBox="0 0 60 60" class="glyph"><line x1="30" y1="6" x2="30" y2="44"/><line x1="17" y1="17" x2="43" y2="17"/><path d="M23 44 h14 l-7 9 z"/></svg>',
+    Oros: '<svg viewBox="0 0 60 60" class="glyph"><circle cx="30" cy="30" r="17"/><path d="M30 21 l3.2 8.4 9 .3 -7.2 5.6 2.6 8.7 -7.6 -5.3 -7.6 5.3 2.6 -8.7 -7.2 -5.6 9 -.3 z"/></svg>'
+  };
+  return map[suit];
+}
+function glyphFor(card){ return card.type === 'major' ? majorGlyph() : suitGlyph(card.suit); }
+
+// ---------- Estado ----------
+const POSITIONS = ['Situación actual', 'Desafío o influencia', 'Consejo y tendencia'];
+const THEMES = ['Amor','Trabajo','Dinero','Proyectos','Espiritualidad','Consulta general'];
+let selectedTheme = null;
+let drawnCards = [];
+let isYesNo = false;
+
+const yesnoChip = document.getElementById('yesno-chip');
+const questionTa = document.getElementById('question');
+yesnoChip.addEventListener('click', () => {
+  isYesNo = !isYesNo;
+  yesnoChip.classList.toggle('active', isYesNo);
+  questionTa.placeholder = isYesNo
+    ? 'Por ejemplo: ¿Debería aceptar esta propuesta de trabajo?'
+    : 'Por ejemplo: ¿qué necesito ver hoy en mi trabajo?';
+});
+
+// ---------- Chips ----------
+const chipsEl = document.getElementById('chips');
+THEMES.forEach(t => {
+  const b = document.createElement('button');
+  b.className = 'chip';
+  b.type = 'button';
+  b.textContent = t;
+  b.addEventListener('click', () => {
+    document.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
+    if(selectedTheme === t){ selectedTheme = null; return; }
+    b.classList.add('active');
+    selectedTheme = t;
+    const ta = document.getElementById('question');
+    if(!ta.value.trim()){
+      ta.value = 'Sobre ' + t.toLowerCase() + ': ';
+      ta.focus();
+      ta.setSelectionRange(ta.value.length, ta.value.length);
+    }
+  });
+  chipsEl.appendChild(b);
+});
+
+// ---------- Flujo principal ----------
+const drawBtn = document.getElementById('draw-btn');
+const hint = document.getElementById('hint');
+const cardsSection = document.getElementById('cards-section');
+const cardsRow = document.getElementById('cards-row');
+const statusText = document.getElementById('status-text');
+const readingSection = document.getElementById('reading-section');
+
+drawBtn.addEventListener('click', async () => {
+  const question = document.getElementById('question').value.trim();
+  if(question.length < 6){
+    hint.textContent = 'Contame un poco más para poder leer las cartas con sentido.';
+    return;
+  }
+  hint.textContent = '';
+  drawBtn.disabled = true;
+  readingSection.classList.add('hidden');
+  readingSection.innerHTML = '';
+
+  const deck = buildDeck();
+  drawnCards = shuffle(deck).slice(0,3);
+
+  renderCardBacks();
+  cardsSection.classList.remove('hidden');
+  cardsSection.scrollIntoView({behavior:'smooth', block:'start'});
+
+  await sleep(500);
+  flipCards();
+
+  const messages = ['Barajando el mazo…','Concentrando la energía de tu pregunta…','Leyendo la combinación…'];
+  let mi = 0;
+  statusText.textContent = messages[0];
+  const statusTimer = setInterval(() => {
+    mi = (mi+1) % messages.length;
+    statusText.textContent = messages[mi];
+  }, 750);
+
+  try{
+    const data = await withMinDelay(generateReading(question, selectedTheme, drawnCards, isYesNo), 1900);
+    clearInterval(statusTimer);
+    statusText.textContent = '';
+    renderReading(data, question, isYesNo);
+  }catch(err){
+    clearInterval(statusTimer);
+    statusText.innerHTML = '';
+    const box = document.createElement('div');
+    box.className = 'error-box';
+    box.innerHTML = 'No pude armar la lectura esta vez. &iquest;Probamos de nuevo?<br><br><button class="ghost" id="retry-btn">Reintentar</button>';
+    cardsSection.appendChild(box);
+    document.getElementById('retry-btn').addEventListener('click', () => {
+      box.remove();
+      drawBtn.disabled = false;
+      drawBtn.click();
+    });
+  }
+  drawBtn.disabled = false;
+});
+
+function sleep(ms){ return new Promise(r => setTimeout(r, ms)); }
+function withMinDelay(promiseOrValue, ms){
+  return Promise.all([Promise.resolve(promiseOrValue), sleep(ms)]).then(r => r[0]);
+}
+
+function renderCardBacks(){
+  cardsRow.innerHTML = '';
+  drawnCards.forEach((card, i) => {
+    const slot = document.createElement('div');
+    slot.className = 'card-slot';
+    slot.innerHTML =
+      '<div class="card-viewport"><div class="card" id="card-'+i+'">' +
+        '<div class="card-face card-back">' + lilyBackGlyph() + '</div>' +
+        '<div class="card-face card-front">' +
+          (card.type === 'major' ? '<div class="numeral">'+card.numeral+'</div>' : '') +
+          glyphFor(card) +
+          '<div class="card-name">'+card.name+'</div>' +
+        '</div>' +
+      '</div></div>' +
+      '<p class="card-position">'+POSITIONS[i]+'</p>';
+    cardsRow.appendChild(slot);
+  });
+}
+function flipCards(){
+  drawnCards.forEach((_, i) => {
+    setTimeout(() => {
+      document.getElementById('card-'+i).classList.add('flipped');
+    }, i * 260);
+  });
+}
+
+// ---------- Motor de lectura local ----------
+const THEME_KEYS = {
+  'Amor':'amor', 'Trabajo':'trabajo', 'Dinero':'dinero',
+  'Proyectos':'proyectos', 'Espiritualidad':'espiritualidad', 'Consulta general':'general'
+};
+
+const POSITION_TEXT = {
+  0: { // Situación actual — usa la "esencia" de la carta
+    amor: e => 'En el amor, tu momento actual tiene que ver con ' + e + '.',
+    trabajo: e => 'En lo laboral, tu situación de fondo hoy es ' + e + '.',
+    dinero: e => 'En tus finanzas, la energía de fondo es ' + e + '.',
+    proyectos: e => 'En tu proyecto, el momento que atravesás se define por ' + e + '.',
+    espiritualidad: e => 'En tu proceso interior, hoy resuena ' + e + '.',
+    general: e => 'En esta consulta, tu momento actual está atravesado por ' + e + '.'
+  },
+  1: { // Desafío o influencia — usa la "esencia" de la carta
+    amor: e => 'El desafío en el vínculo tiene que ver con ' + e + '.',
+    trabajo: e => 'El desafío a reconocer en lo laboral es ' + e + '.',
+    dinero: e => 'Lo que conviene mirar de frente en el terreno económico es ' + e + '.',
+    proyectos: e => 'El aspecto a trabajar en el proyecto es ' + e + '.',
+    espiritualidad: e => 'Lo que este momento te invita a reconocer en vos es ' + e + '.',
+    general: e => 'El desafío o la influencia a tener en cuenta es ' + e + '.'
+  },
+  2: { // Consejo y tendencia — usa el "consejo" de la carta
+    amor: c => 'El consejo para el vínculo es: ' + c + '.',
+    trabajo: c => 'El consejo a nivel laboral es: ' + c + '.',
+    dinero: c => 'El consejo en lo económico es: ' + c + '.',
+    proyectos: c => 'El consejo para el proyecto es: ' + c + '.',
+    espiritualidad: c => 'El consejo para tu proceso interior es: ' + c + '.',
+    general: c => 'El consejo que trae esta carta es: ' + c + '.'
+  }
+};
+
+const REFLEXIONES = [
+  '¿Qué parte de esto ya sabías, aunque todavía no te animaste a decirlo en voz alta?',
+  'Si nadie más opinara sobre esto, ¿qué harías?',
+  '¿Qué necesitás soltar para poder avanzar con más claridad?',
+  '¿Qué te está pidiendo este momento que todavía no le diste?',
+  '¿Qué cambiaría si confiaras un poco más en lo que ya sabés?',
+  '¿Qué parte de la respuesta depende solo de vos?',
+  '¿Qué estás esperando que pase para animarte a decidir?',
+  '¿Qué versión de vos querés que tome esta decisión?'
+];
+
+function pick(arr){ return arr[Math.floor(Math.random()*arr.length)]; }
+function cap(s){ return s.charAt(0).toUpperCase() + s.slice(1); }
+
+function buildLecturaConjunta(cards){
+  const majors = cards.filter(c => c.type === 'major').length;
+  const suitCounts = {};
+  cards.filter(c => c.type === 'minor').forEach(c => { suitCounts[c.suit] = (suitCounts[c.suit]||0)+1; });
+  let dominantSuit = null, maxCount = 0;
+  for(const s in suitCounts){ if(suitCounts[s] > maxCount){ maxCount = suitCounts[s]; dominantSuit = s; } }
+
+  let intro;
+  if(majors === 3) intro = 'Las tres cartas que salieron son arcanos mayores: eso suele señalar un momento de peso, donde lo que está en juego va más allá de un detalle puntual.';
+  else if(majors === 2) intro = 'Dos de las tres cartas son arcanos mayores, lo que sugiere que hay una fuerza importante moviéndose de fondo en esta consulta, más allá de lo cotidiano.';
+  else if(majors === 1) intro = 'Aparece un arcano mayor entre cartas más cotidianas: hay un tema de fondo importante que se mezcla con la dinámica del día a día.';
+  else intro = 'Las tres cartas son arcanos menores: esta consulta tiene más que ver con la dinámica cotidiana y concreta que con un giro grande de destino.';
+
+  let elemento = '';
+  if(dominantSuit && maxCount >= 2){
+    const elementText = {
+      Bastos: 'predomina el elemento fuego (Bastos): la energía, la iniciativa y la acción están pidiendo protagonismo',
+      Copas: 'predomina el elemento agua (Copas): lo emocional y los vínculos son el terreno donde se juega esta consulta',
+      Espadas: 'predomina el elemento aire (Espadas): el pensamiento, la comunicación o un conflicto a resolver están en el centro',
+      Oros: 'predomina el elemento tierra (Oros): lo concreto, lo material y lo práctico son el foco de esta consulta'
+    };
+    elemento = ' Además, ' + elementText[dominantSuit] + '.';
+  }
+
+  const cierre = ' En conjunto, ' + cards[0].name + ', ' + cards[1].name + ' y ' + cards[2].name +
+    ' arman una secuencia que va del punto en el que estás parado/a, pasando por lo que conviene mirar de frente, hacia una dirección posible a seguir. La lectura es orientativa: lo que hagas con esto es una decisión que sigue siendo tuya.';
+
+  return intro + elemento + cierre;
+}
+
+function buildVeredicto(cards){
+  const score = cards.reduce((acc, c) => {
+    const p = CARD_DATA[c.name].pol;
+    return acc + (p === 'pos' ? 1 : p === 'neg' ? -1 : 0);
+  }, 0);
+
+  let tendencia, matiz;
+  if(score >= 2){
+    tendencia = 'Más cerca del sí';
+    matiz = 'Las tres cartas traen más elementos favorables que obstáculos, así que la balanza se inclina hacia el sí, aunque el resultado final sigue dependiendo de lo que hagas con esto.';
+  } else if(score <= -2){
+    tendencia = 'Más cerca del no';
+    matiz = 'Hay más señales de traba que de impulso en esta combinación, por eso la balanza se inclina hacia el no por ahora, no como algo cerrado para siempre sino como una tendencia actual.';
+  } else {
+    tendencia = 'Está dividido, depende de vos';
+    matiz = 'Las cartas muestran señales encontradas: ni un sí ni un no claro, sino una situación que todavía depende de decisiones que están en tus manos.';
+  }
+  return { tendencia, matiz };
+}
+
+function generateReading(question, theme, cards, yesNo){
+  const key = THEME_KEYS[theme] || 'general';
+
+  if(yesNo){
+    const veredicto = buildVeredicto(cards);
+    const consejo = cap(CARD_DATA[cards[2].name].consejo) + '. Además, ' + CARD_DATA[cards[0].name].esencia + ' es algo a tener presente en el camino.';
+    return { tema: question, veredicto: veredicto, consejo: consejo };
+  }
+
+  const posiciones = ['Situación actual', 'Desafío o influencia', 'Consejo y tendencia'];
+  const cartasOut = cards.map((c, i) => {
+    const d = CARD_DATA[c.name];
+    const texto = i < 2 ? POSITION_TEXT[i][key](d.esencia) : POSITION_TEXT[i][key](d.consejo);
+    return { nombre: c.name, posicion: posiciones[i], interpretacion: texto };
+  });
+
+  return {
+    tema: question,
+    cartas: cartasOut,
+    lectura_conjunta: buildLecturaConjunta(cards),
+    consejo_practico: cards.map(c => cap(CARD_DATA[c.name].consejo) + '.'),
+    pregunta_reflexion: pick(REFLEXIONES)
+  };
+}
+
+// ---------- Render de la lectura ----------
+function renderReading(data, question, yesNo){
+  readingSection.innerHTML = '';
+  readingSection.classList.remove('hidden');
+
+  const tema = document.createElement('p');
+  tema.className = 'tema';
+  tema.textContent = '"' + (data.tema || question) + '"';
+  readingSection.appendChild(tema);
+
+  if(yesNo && data.veredicto){
+    // Modo sí/no: solo la respuesta y un consejo, sin el desarrollo largo.
+    const ver = document.createElement('div');
+    ver.className = 'veredicto';
+    ver.innerHTML = '<div class="tendencia">'+data.veredicto.tendencia+'</div>' +
+      (data.veredicto.matiz ? '<div class="matiz">'+data.veredicto.matiz+'</div>' : '');
+    readingSection.appendChild(ver);
+
+    const h2c = document.createElement('h2');
+    h2c.textContent = 'Consejo';
+    readingSection.appendChild(h2c);
+    const block = document.createElement('div');
+    block.className = 'block';
+    block.innerHTML = '<p>'+data.consejo+'</p>';
+    readingSection.appendChild(block);
+  } else {
+    const h2a = document.createElement('h2');
+    h2a.textContent = 'Las tres cartas';
+    readingSection.appendChild(h2a);
+
+    (data.cartas || []).forEach(c => {
+      const div = document.createElement('div');
+      div.className = 'card-reading';
+      div.innerHTML = '<div class="ct">'+c.nombre+'</div><div class="cp">'+c.posicion+'</div><p>'+c.interpretacion+'</p>';
+      readingSection.appendChild(div);
+    });
+
+    const h2b = document.createElement('h2');
+    h2b.textContent = 'Lectura conjunta';
+    readingSection.appendChild(h2b);
+    const block = document.createElement('div');
+    block.className = 'block';
+    block.innerHTML = '<p>'+data.lectura_conjunta+'</p>';
+    readingSection.appendChild(block);
+
+    const h2c = document.createElement('h2');
+    h2c.textContent = 'Consejo práctico';
+    readingSection.appendChild(h2c);
+    const ul = document.createElement('ul');
+    ul.className = 'consejos';
+    (data.consejo_practico || []).forEach(item => {
+      const li = document.createElement('li');
+      li.textContent = item;
+      ul.appendChild(li);
+    });
+    readingSection.appendChild(ul);
+
+    const refl = document.createElement('p');
+    refl.className = 'reflexion';
+    refl.textContent = data.pregunta_reflexion;
+    readingSection.appendChild(refl);
+  }
+
+  const again = document.createElement('div');
+  again.className = 'again';
+  again.innerHTML = '<button class="ghost" id="again-btn">Hacer otra consulta</button>';
+  readingSection.appendChild(again);
+  document.getElementById('again-btn').addEventListener('click', () => {
+    document.getElementById('question').value = '';
+    selectedTheme = null;
+    isYesNo = false;
+    document.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
+    questionTa.placeholder = 'Por ejemplo: ¿qué necesito ver hoy en mi trabajo?';
+    readingSection.classList.add('hidden');
+    cardsSection.classList.add('hidden');
+    window.scrollTo({top:0, behavior:'smooth'});
+  });
+
+  readingSection.scrollIntoView({behavior:'smooth', block:'start'});
+}
+</script>
+</body>
+</html>
